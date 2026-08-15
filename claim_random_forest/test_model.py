@@ -29,3 +29,26 @@ if probability >= threshold:
     print("Prediction: Suspicious Claim")
 else:
     print("Prediction: Normal Claim")
+    risk_score = probability * 100
+
+print("Risk Score:", round(risk_score, 2), "/ 100")
+feature_names = [
+    "DIAGNOSIS_COUNT",
+    "PRVDR_STATE_CD",
+    "LINE_PLACE_OF_SRVC_CD",
+    "LINE_NUM"
+]
+
+for feature, importance in zip(feature_names, model.feature_importances_):
+    print(feature, ":", round(importance, 3))
+    importances = dict(zip(feature_names, model.feature_importances_))
+
+top_feature = max(importances, key=importances.get)
+
+reason_map = {
+    "DIAGNOSIS_COUNT": "Unusual diagnosis pattern",
+    "PRVDR_STATE_CD": "Provider location pattern contributed to risk",
+    "LINE_PLACE_OF_SRVC_CD": "Unusual place of service pattern",
+    "LINE_NUM": "Unusual number of claim service lines"
+}
+print("Primary Model Driver:", reason_map[top_feature])
