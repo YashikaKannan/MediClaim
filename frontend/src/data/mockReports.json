@@ -1,0 +1,26 @@
+[
+  {
+    "id": "provider-investigation-report",
+    "name": "Provider Investigation Report",
+    "description": "Provider summary, reasons, peer comparison, and score breakdown",
+    "exportTypes": ["PDF", "Excel", "CSV"]
+  },
+  {
+    "id": "claim-investigation-report",
+    "name": "Claim Investigation Report",
+    "description": "Claim detail, flagged drivers, and procedure-level evidence",
+    "exportTypes": ["PDF", "Excel", "CSV"]
+  },
+  {
+    "id": "monthly-leakage-report",
+    "name": "Monthly Leakage Report",
+    "description": "Trend of potential excess payment by specialty, state, and type",
+    "exportTypes": ["PDF", "Excel", "CSV"]
+  },
+  {
+    "id": "risk-distribution-report",
+    "name": "Risk Distribution Report",
+    "description": "Portfolio-level risk segmentation and concentration review",
+    "exportTypes": ["PDF", "Excel", "CSV"]
+  }
+]
