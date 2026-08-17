@@ -1,0 +1,23 @@
+{
+  "total_providers": 5410,
+  "anomalies_detected": 977,
+  "normal_providers": 4433,
+  "anomaly_rate": 18.059149722735672,
+  "precision": 0.3510747185261003,
+  "recall": 0.6778656126482213,
+  "f1_score": 0.46257585974376253,
+  "confusion_matrix": [
+    [
+      4270,
+      634
+    ],
+    [
+      163,
+      343
+    ]
+  ],
+  "roc_auc": 0.8850184410241863,
+  "pr_auc": 0.4766162784422462,
+  "fraud_detection_rate": 67.78656126482213,
+  "false_positive_rate": 12.928221859706362
+}

@@ -1,0 +1,85 @@
+Dataset,Column,DataType,NonNull,Null,NullPercentage,Mean,Median,Std,Min,Max
+Provider,Provider,object,5410,0,0.0,,,,,
+Provider,PotentialFraud,object,5410,0,0.0,,,,,
+Beneficiary,BeneID,object,138556,0,0.0,,,,,
+Beneficiary,DOB,object,138556,0,0.0,,,,,
+Beneficiary,DOD,object,1421,137135,98.97442189439649,,,,,
+Beneficiary,Gender,int64,138556,0,0.0,1.570931608880164,2.0,0.49494492106364024,1.0,2.0
+Beneficiary,Race,int64,138556,0,0.0,1.2545108115130343,1.0,0.717006690602713,1.0,5.0
+Beneficiary,RenalDiseaseIndicator,object,138556,0,0.0,,,,,
+Beneficiary,State,int64,138556,0,0.0,25.666734028118594,25.0,15.223443038004916,1.0,54.0
+Beneficiary,County,int64,138556,0,0.0,374.4247452293657,340.0,266.27758112503125,0.0,999.0
+Beneficiary,NoOfMonths_PartACov,int64,138556,0,0.0,11.907726839689367,12.0,1.0323317466234552,0.0,12.0
+Beneficiary,NoOfMonths_PartBCov,int64,138556,0,0.0,11.910144634660353,12.0,0.936893335455158,0.0,12.0
+Beneficiary,ChronicCond_Alzheimer,int64,138556,0,0.0,1.6678166228817228,2.0,0.47099807023400075,1.0,2.0
+Beneficiary,ChronicCond_Heartfailure,int64,138556,0,0.0,1.506322353416669,2.0,0.49996183043949405,1.0,2.0
+Beneficiary,ChronicCond_KidneyDisease,int64,138556,0,0.0,1.6876425416438119,2.0,0.46345639145680423,1.0,2.0
+Beneficiary,ChronicCond_Cancer,int64,138556,0,0.0,1.8800412829469673,2.0,0.32491442747557414,1.0,2.0
+Beneficiary,ChronicCond_ObstrPulmonary,int64,138556,0,0.0,1.7628467911891221,2.0,0.42533853583205156,1.0,2.0
+Beneficiary,ChronicCond_Depression,int64,138556,0,0.0,1.6444758797886776,2.0,0.47867355666167566,1.0,2.0
+Beneficiary,ChronicCond_Diabetes,int64,138556,0,0.0,1.3981422673864718,1.0,0.4895168350163902,1.0,2.0
+Beneficiary,ChronicCond_IschemicHeart,int64,138556,0,0.0,1.3241433066774444,1.0,0.46805555711962044,1.0,2.0
+Beneficiary,ChronicCond_Osteoporasis,int64,138556,0,0.0,1.7253168394006755,2.0,0.4463560908198635,1.0,2.0
+Beneficiary,ChronicCond_rheumatoidarthritis,int64,138556,0,0.0,1.7431796529922918,2.0,0.43688102945819957,1.0,2.0
+Beneficiary,ChronicCond_stroke,int64,138556,0,0.0,1.9209417130979531,2.0,0.26983068701604684,1.0,2.0
+Beneficiary,IPAnnualReimbursementAmt,int64,138556,0,0.0,3660.346502497185,0.0,9568.621827235773,-8000.0,161470.0
+Beneficiary,IPAnnualDeductibleAmt,int64,138556,0,0.0,399.84729640001154,0.0,956.1752023312978,0.0,38272.0
+Beneficiary,OPAnnualReimbursementAmt,int64,138556,0,0.0,1298.2193481336067,570.0,2493.90113379145,-70.0,102960.0
+Beneficiary,OPAnnualDeductibleAmt,int64,138556,0,0.0,377.7182583215451,170.0,645.530186614042,0.0,13840.0
+Inpatient Claims,BeneID,object,40474,0,0.0,,,,,
+Inpatient Claims,ClaimID,object,40474,0,0.0,,,,,
+Inpatient Claims,ClaimStartDt,object,40474,0,0.0,,,,,
+Inpatient Claims,ClaimEndDt,object,40474,0,0.0,,,,,
+Inpatient Claims,Provider,object,40474,0,0.0,,,,,
+Inpatient Claims,InscClaimAmtReimbursed,int64,40474,0,0.0,10087.884073726344,7000.0,10303.09940247408,0.0,125000.0
+Inpatient Claims,AttendingPhysician,object,40362,112,0.2767208578346593,,,,,
+Inpatient Claims,OperatingPhysician,object,23830,16644,41.122696051786335,,,,,
+Inpatient Claims,OtherPhysician,object,4690,35784,88.41231407817364,,,,,
+Inpatient Claims,AdmissionDt,object,40474,0,0.0,,,,,
+Inpatient Claims,ClmAdmitDiagnosisCode,object,40474,0,0.0,,,,,
+Inpatient Claims,DeductibleAmtPaid,float64,39575,899,2.221179028512131,1068.0,1068.0,0.0,1068.0,1068.0
+Inpatient Claims,DischargeDt,object,40474,0,0.0,,,,,
+Inpatient Claims,DiagnosisGroupCode,object,40474,0,0.0,,,,,
+Inpatient Claims,ClmDiagnosisCode_1,object,40474,0,0.0,,,,,
+Inpatient Claims,ClmDiagnosisCode_2,object,40248,226,0.5583831595592232,,,,,
+Inpatient Claims,ClmDiagnosisCode_3,object,39798,676,1.670208034787765,,,,,
+Inpatient Claims,ClmDiagnosisCode_4,object,38940,1534,3.7900874635568513,,,,,
+Inpatient Claims,ClmDiagnosisCode_5,object,37580,2894,7.150269308692,,,,,
+Inpatient Claims,ClmDiagnosisCode_6,object,35636,4838,11.9533527696793,,,,,
+Inpatient Claims,ClmDiagnosisCode_7,object,33216,7258,17.932499876463904,,,,,
+Inpatient Claims,ClmDiagnosisCode_8,object,30532,9942,24.563917576715916,,,,,
+Inpatient Claims,ClmDiagnosisCode_9,object,26977,13497,33.347334091021395,,,,,
+Inpatient Claims,ClmDiagnosisCode_10,object,3927,36547,90.29747492217226,,,,,
+Inpatient Claims,ClmProcedureCode_1,float64,23148,17326,42.80772841824381,5894.611759115259,5369.0,3049.3043999610845,11.0,9999.0
+Inpatient Claims,ClmProcedureCode_2,float64,5454,35020,86.52468251223007,4103.738173817382,4019.0,2028.1821560855296,42.0,9999.0
+Inpatient Claims,ClmProcedureCode_3,float64,965,39509,97.61575332312101,4226.355440414508,4019.0,2282.76158079077,42.0,9999.0
+Inpatient Claims,ClmProcedureCode_4,float64,116,40358,99.71339625438553,4070.1724137931033,4019.0,1994.4098016635185,42.0,9986.0
+Inpatient Claims,ClmProcedureCode_5,float64,9,40465,99.97776350249543,5269.444444444444,4139.0,2780.0716317709835,2724.0,9982.0
+Inpatient Claims,ClmProcedureCode_6,float64,0,40474,100.0,,,,,
+Outpatient Claims,BeneID,object,517737,0,0.0,,,,,
+Outpatient Claims,ClaimID,object,517737,0,0.0,,,,,
+Outpatient Claims,ClaimStartDt,object,517737,0,0.0,,,,,
+Outpatient Claims,ClaimEndDt,object,517737,0,0.0,,,,,
+Outpatient Claims,Provider,object,517737,0,0.0,,,,,
+Outpatient Claims,InscClaimAmtReimbursed,int64,517737,0,0.0,286.33479932861667,80.0,694.0343432626813,0.0,102500.0
+Outpatient Claims,AttendingPhysician,object,516341,1396,0.26963496910593604,,,,,
+Outpatient Claims,OperatingPhysician,object,90617,427120,82.4974842439308,,,,,
+Outpatient Claims,OtherPhysician,object,195046,322691,62.32720473908567,,,,,
+Outpatient Claims,ClmDiagnosisCode_1,object,507284,10453,2.018978747897098,,,,,
+Outpatient Claims,ClmDiagnosisCode_2,object,322357,195380,37.73730677931073,,,,,
+Outpatient Claims,ClmDiagnosisCode_3,object,203257,314480,60.74126438713092,,,,,
+Outpatient Claims,ClmDiagnosisCode_4,object,125596,392141,75.74135130384732,,,,,
+Outpatient Claims,ClmDiagnosisCode_5,object,74344,443393,85.6405858572982,,,,,
+Outpatient Claims,ClmDiagnosisCode_6,object,48756,468981,90.58286350019411,,,,,
+Outpatient Claims,ClmDiagnosisCode_7,object,32961,484776,93.63364024591637,,,,,
+Outpatient Claims,ClmDiagnosisCode_8,object,22912,494825,95.57458709731003,,,,,
+Outpatient Claims,ClmDiagnosisCode_9,object,14838,502899,97.13406613782674,,,,,
+Outpatient Claims,ClmDiagnosisCode_10,object,1083,516654,99.79082043585836,,,,,
+Outpatient Claims,ClmProcedureCode_1,float64,162,517575,99.96870998209516,6116.611111111111,5244.5,3217.7192575637946,51.0,9999.0
+Outpatient Claims,ClmProcedureCode_2,float64,36,517701,99.99304666268782,4503.277777777777,4019.0,2504.0150000818526,412.0,9982.0
+Outpatient Claims,ClmProcedureCode_3,float64,4,517733,99.99922740696532,2959.0,3511.5,1863.4553925436476,412.0,4401.0
+Outpatient Claims,ClmProcedureCode_4,float64,2,517735,99.99961370348265,4075.5,4075.5,5323.806955553517,311.0,7840.0
+Outpatient Claims,ClmProcedureCode_5,float64,0,517737,100.0,,,,,
+Outpatient Claims,ClmProcedureCode_6,float64,0,517737,100.0,,,,,
+Outpatient Claims,DeductibleAmtPaid,int64,517737,0,0.0,2.7792334718206346,0.0,15.78583931708701,0.0,897.0
+Outpatient Claims,ClmAdmitDiagnosisCode,object,105425,412312,79.63734482951769,,,,,
