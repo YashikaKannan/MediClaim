@@ -1,0 +1,5 @@
+TopPercent,ProvidersReviewed,FraudProvidersFound,Precision,Recall
+1,55,9,0.1636,0.0178
+5,271,68,0.2509,0.1344
+10,541,141,0.2606,0.2787
+20,1082,243,0.2246,0.4802

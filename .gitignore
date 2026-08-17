@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Autoencoder generated large datasets/results
+claim_autoencoder/processed/*.csv
+claim_autoencoder/results/claim_anomaly_results.csv
+claim_autoencoder/results/test_claim_anomaly_results.csv
+
+# Local raw datasets
+data/
+*.zip
+
+# IDE / OS
+.vscode/
+.DS_Store
+Thumbs.db
+# Local backup
+claim_autoencoder_old/
