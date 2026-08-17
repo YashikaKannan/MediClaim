@@ -1,0 +1,128 @@
+[
+  {
+    "pattern_name": "Excessive Claim Payment",
+    "description": "Claim payment amount is materially higher than peers for similar claim profiles.",
+    "business_reason": "Large paid amounts can indicate inflated reimbursement requests or billing errors.",
+    "severity": "High"
+  },
+  {
+    "pattern_name": "Excessive Submitted Charges",
+    "description": "Submitted charge amount is in the extreme upper tail of observed claims.",
+    "business_reason": "Very high submitted charges may represent overpricing, duplicate billing, or unsupported services.",
+    "severity": "High"
+  },
+  {
+    "pattern_name": "High Charge Allowed Ratio",
+    "description": "Submitted line charge is disproportionately high versus allowed charge.",
+    "business_reason": "A high submitted-to-allowed ratio suggests persistent overbilling pressure on adjudication.",
+    "severity": "High"
+  },
+  {
+    "pattern_name": "High Charge Payment Ratio",
+    "description": "Submitted line charge is abnormally high relative to actual Medicare payment.",
+    "business_reason": "A large gap between submitted and paid values can signal systematic billing inflation.",
+    "severity": "High"
+  },
+  {
+    "pattern_name": "Unusual Service Intensity",
+    "description": "Service count is high relative to diagnosis complexity.",
+    "business_reason": "Utilization out of proportion to clinical complexity can indicate unnecessary service volume.",
+    "severity": "Medium"
+  },
+  {
+    "pattern_name": "Abnormally High Diagnosis Count",
+    "description": "Diagnosis count exceeds typical claim burden.",
+    "business_reason": "Overly dense diagnosis coding may indicate coding inflation to justify higher utilization.",
+    "severity": "Medium"
+  },
+  {
+    "pattern_name": "Potential Overbilling",
+    "description": "Claim-level submitted charges materially exceed claim-level allowed charges.",
+    "business_reason": "Large claim-level gaps can indicate billing amounts not aligned with payer fee schedules.",
+    "severity": "High"
+  },
+  {
+    "pattern_name": "Potential Upcoding",
+    "description": "Billing behavior appears elevated versus specialty-specific peers.",
+    "business_reason": "Relative outlier billing among same-specialty providers can indicate coding at higher-paying levels.",
+    "severity": "High"
+  },
+  {
+    "pattern_name": "Excessive Service Utilization",
+    "description": "Line-level service volume is in the top distribution tail.",
+    "business_reason": "Excess utilization can suggest unbundling or medically unnecessary repeated services.",
+    "severity": "Medium"
+  },
+  {
+    "pattern_name": "Extreme Financial Outlier",
+    "description": "Multiple monetary fields simultaneously fall in extreme percentiles.",
+    "business_reason": "Concurrent high-end financial indicators often warrant immediate audit prioritization.",
+    "severity": "Critical"
+  },
+  {
+    "pattern_name": "Peer Billing Deviation",
+    "description": "Provider submitted amount is significantly above specialty median.",
+    "business_reason": "Deviation from specialty baseline may indicate non-standard charging practices.",
+    "severity": "High"
+  },
+  {
+    "pattern_name": "Allowed-to-Paid Mismatch",
+    "description": "Allowed amounts do not align with paid amounts at expected levels.",
+    "business_reason": "Inconsistent allowed-versus-paid behavior can indicate billing workflow anomalies.",
+    "severity": "Medium"
+  },
+  {
+    "pattern_name": "Line Charge Concentration",
+    "description": "Atypical concentration of high-value line charges in a single claim.",
+    "business_reason": "High concentration patterns can point to charge stacking or non-random billing behavior.",
+    "severity": "Medium"
+  },
+  {
+    "pattern_name": "High Zero-Payment Charge Exposure",
+    "description": "Claims show substantial submitted charges despite low or zero net payment.",
+    "business_reason": "This pattern may indicate repeated non-payable submissions or intentional charge inflation.",
+    "severity": "Medium"
+  },
+  {
+    "pattern_name": "Specialty Outlier Utilization",
+    "description": "Service and charge intensity is elevated compared with providers in the same specialty.",
+    "business_reason": "Specialty-relative outliers can identify aberrant practice styles needing targeted review.",
+    "severity": "High"
+  },
+  {
+    "pattern_name": "High-Risk Composite Signature",
+    "description": "Claim breaches multiple anomaly indicators across finance and utilization dimensions.",
+    "business_reason": "Multi-signal anomalies generally carry higher fraud risk than isolated single-feature outliers.",
+    "severity": "Critical"
+  },
+  {
+    "pattern_name": "Charge Escalation Profile",
+    "description": "Submitted amounts rise steeply versus expected adjudicated values.",
+    "business_reason": "Escalation trends can indicate deliberate billing inflation over realistic reimbursement levels.",
+    "severity": "High"
+  },
+  {
+    "pattern_name": "Diagnosis-Utilization Imbalance",
+    "description": "Service volume does not scale consistently with diagnosis burden.",
+    "business_reason": "Mismatch between diagnoses and performed services can indicate unnecessary procedures.",
+    "severity": "Medium"
+  },
+  {
+    "pattern_name": "Claim Severity Inflation",
+    "description": "Coding and monetary profile imply higher-than-expected claim complexity.",
+    "business_reason": "Inflated severity coding can increase reimbursement and should be clinically validated.",
+    "severity": "High"
+  },
+  {
+    "pattern_name": "Outlier Payment Velocity",
+    "description": "Financial values cluster near historical extremes in one claim event.",
+    "business_reason": "Extreme-value clustering is uncommon and useful for prioritizing investigative queues.",
+    "severity": "High"
+  },
+  {
+    "pattern_name": "Repeated High-Cost Billing Behavior",
+    "description": "Claim appears within a pattern of high-cost billing signals.",
+    "business_reason": "Repeated high-cost anomalies may indicate persistent billing control weaknesses or abusive behavior.",
+    "severity": "High"
+  }
+]
