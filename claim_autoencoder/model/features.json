@@ -1,0 +1,14 @@
+[
+    "InscClaimAmtReimbursed",
+    "DeductibleAmtPaid",
+    "ClaimDuration",
+    "DiagnosisCount",
+    "ProcedureCount",
+    "PhysicianCount",
+    "HospitalStayDays",
+    "IPAnnualReimbursementAmt",
+    "IPAnnualDeductibleAmt",
+    "OPAnnualReimbursementAmt",
+    "OPAnnualDeductibleAmt",
+    "ChronicConditionCount"
+]
