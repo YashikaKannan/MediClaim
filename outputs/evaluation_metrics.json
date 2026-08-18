@@ -1,23 +1,23 @@
 {
   "total_providers": 5410,
-  "anomalies_detected": 977,
-  "normal_providers": 4433,
-  "anomaly_rate": 18.059149722735672,
-  "precision": 0.3510747185261003,
-  "recall": 0.6778656126482213,
-  "f1_score": 0.46257585974376253,
+  "anomalies_detected": 970,
+  "normal_providers": 4440,
+  "anomaly_rate": 17.929759704251385,
+  "precision": 0.35051546391752575,
+  "recall": 0.6719367588932806,
+  "f1_score": 0.46070460704607047,
   "confusion_matrix": [
     [
-      4270,
-      634
+      4274,
+      630
     ],
     [
-      163,
-      343
+      166,
+      340
     ]
   ],
-  "roc_auc": 0.8850184410241863,
-  "pr_auc": 0.4766162784422462,
-  "fraud_detection_rate": 67.78656126482213,
-  "false_positive_rate": 12.928221859706362
+  "roc_auc": 0.8843535002482444,
+  "pr_auc": 0.4755109102657328,
+  "fraud_detection_rate": 67.19367588932806,
+  "false_positive_rate": 12.846655791190864
 }

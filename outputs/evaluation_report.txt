@@ -14,20 +14,20 @@ Features Used: 50+
 
 ANOMALIES DETECTED
 ----------------------------------------------------------------------
-Anomalies: 977
-Normal: 4433
-Anomaly Rate: 18.06%
+Anomalies: 970
+Normal: 4440
+Anomaly Rate: 17.93%
 
 SUPERVISED EVALUATION METRICS (using PotentialFraud label)
 ----------------------------------------------------------------------
-Precision: 0.3511
-Recall: 0.6779
-F1-Score: 0.4626
-ROC-AUC: 0.8850
-PR-AUC: 0.4766
+Precision: 0.3505
+Recall: 0.6719
+F1-Score: 0.4607
+ROC-AUC: 0.8844
+PR-AUC: 0.4755
 
-Fraud Detection Rate: 67.79%
-False Positive Rate: 12.93%
+Fraud Detection Rate: 67.19%
+False Positive Rate: 12.85%
 
 RISK DISTRIBUTION
 ----------------------------------------------------------------------
