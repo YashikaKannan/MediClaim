@@ -1,0 +1,100 @@
+.global-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0 1.5rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  margin-bottom: 1.5rem;
+  background: transparent;
+}
+
+.global-search-form {
+  position: relative;
+  width: 320px;
+}
+
+.global-search-form input {
+  padding: 0.55rem 1rem 0.55rem 2.25rem;
+  font-size: 0.82rem;
+  border-radius: 8px;
+}
+
+.global-search-form .search-icon {
+  position: absolute;
+  left: 0.85rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.system-health {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  color: var(--risk-low);
+  background: rgba(16, 185, 129, 0.05);
+  border: 1px solid rgba(16, 185, 129, 0.15);
+  padding: 0.35rem 0.65rem;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+.health-icon.active {
+  color: var(--risk-low);
+  filter: drop-shadow(0 0 4px var(--risk-low));
+}
+
+.notification-bell {
+  color: var(--text-secondary);
+  cursor: pointer;
+  position: relative;
+  transition: var(--transition-fast);
+}
+
+.notification-bell:hover {
+  color: var(--text-primary);
+  transform: scale(1.05);
+}
+
+.bell-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 6px;
+  height: 6px;
+  background-color: var(--risk-high);
+  border-radius: 50%;
+  box-shadow: 0 0 6px var(--risk-high);
+}
+
+.user-profile-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  border-left: 1px solid var(--border-color);
+  padding-left: 1.25rem;
+}
+
+.avatar-letter {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--gradient-primary);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.8rem;
+  box-shadow: 0 2px 6px rgba(139, 92, 246, 0.3);
+}
