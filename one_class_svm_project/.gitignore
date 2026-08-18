@@ -1,0 +1,19 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+env/
+.vscode/
+.env
+*.pkl
+*.joblib
+*.h5
+*.keras
+data/
+synthetic_data/
+sythetic data/
+outputs/
+artifacts/
+*.log
+inspection_output.txt
+.ipynb_checkpoints/
