@@ -1,0 +1,2 @@
+ClaimID,BeneID,Provider,InscClaimAmtReimbursed,DeductibleAmtPaid,ClaimStartDt,ClaimEndDt,AttendingPhysician,OperatingPhysician,OtherPhysician
+CLM_MIN_0001,BENE_MIN_0001,PRV_MIN_0001,100,0,2009-01-15,2009-01-15,PHY_MIN_A,PHY_MIN_B,PHY_MIN_C

@@ -1,0 +1,21 @@
+Provider,Provider ID,Provider Type,Specialty,NPI,PotentialFraud
+PRV-001,PRV-001,Outpatient-heavy,Internal Medicine,1000000001,No
+PRV-002,PRV-002,Outpatient-heavy,Cardiology,1000000002,Yes
+PRV-003,PRV-003,Outpatient-heavy,Family Medicine,1000000003,Yes
+PRV-004,PRV-004,Inpatient-heavy,Cardiology,1000000004,Yes
+PRV-005,PRV-005,Outpatient-heavy,Cardiology,1972902351,Yes
+PRV-006,PRV-006,Outpatient-heavy,Family Medicine,1000000006,No
+PRV-007,PRV-007,Outpatient-heavy,Internal Medicine,1000000007,No
+PRV-008,PRV-008,Inpatient-heavy,Internal Medicine,1000000008,No
+PRV-009,PRV-009,Outpatient-heavy,Family Medicine,1000000009,No
+PRV-010,PRV-010,Outpatient-heavy,Internal Medicine,1000000010,No
+PRV-011,PRV-011,Outpatient-heavy,Internal Medicine,1000000011,No
+PRV-012,PRV-012,Inpatient-heavy,Family Medicine,1000000012,No
+PRV-013,PRV-013,Outpatient-heavy,Internal Medicine,1000000013,No
+PRV-014,PRV-014,Outpatient-heavy,Internal Medicine,1000000014,No
+PRV-015,PRV-015,Outpatient-heavy,Family Medicine,1000000015,No
+PRV-016,PRV-016,Inpatient-heavy,Internal Medicine,1000000016,No
+PRV-017,PRV-017,Outpatient-heavy,Internal Medicine,1000000017,No
+PRV-018,PRV-018,Outpatient-heavy,Family Medicine,1000000018,No
+PRV-019,PRV-019,Outpatient-heavy,Internal Medicine,1000000019,No
+PRV-020,PRV-020,Inpatient-heavy,Internal Medicine,1000000020,No

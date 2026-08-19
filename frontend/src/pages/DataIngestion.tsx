@@ -265,8 +265,8 @@ const DataIngestion: React.FC = () => {
     <div className="ingestion-page animate-fade-in">
       <div className="page-header">
         <div>
-          <h1 className="page-title">Data Ingestion & Pipeline</h1>
-          <p className="page-subtitle">Ingest healthcare claim databases, engineer features, and execute risk engines.</p>
+          <h1 className="page-title">Case Intake & Analysis</h1>
+          <p className="page-subtitle">Load healthcare data, review provider and claim activity, and generate evidence for investigator follow-up.</p>
         </div>
         <button 
           className="btn btn-secondary refresh-btn" 
@@ -281,8 +281,8 @@ const DataIngestion: React.FC = () => {
       <div className="ingestion-grid">
         {/* Dataset Status */}
         <div className="card status-card">
-          <h3 className="card-title">Loaded Database Profiles</h3>
-          <p className="card-desc">Active healthcare claims records loaded and available in SQLite.</p>
+          <h3 className="card-title">Current Case Inventory</h3>
+          <p className="card-desc">Healthcare claim records currently loaded and ready for risk review.</p>
           
           <div className="stats-list">
             <div className="stat-entry">
@@ -332,8 +332,8 @@ const DataIngestion: React.FC = () => {
 
         {/* Pipeline Control */}
         <div className="card pipeline-card">
-          <h3 className="card-title">Analysis Pipeline Executor</h3>
-          <p className="card-desc">Execute features calculations, statistical deviations, and ML models on current datasets.</p>
+          <h3 className="card-title">Investigation Analysis Runner</h3>
+          <p className="card-desc">Review claims and provider activity, recalculate risk scores, and generate explainable case findings.</p>
 
           {!runningPipeline ? (
             <div className="pipeline-idle">
@@ -341,7 +341,7 @@ const DataIngestion: React.FC = () => {
                 <div className="pipeline-summary-box animate-fade-in">
                   <div className="summary-title-flex">
                     <Sparkles size={20} className="glow-icon" />
-                    <h4>Risk Analysis Pipeline Output Summary</h4>
+                    <h4>Investigation Summary</h4>
                   </div>
                   <div className="summary-grid">
                     <div className="summary-tile">
@@ -375,7 +375,7 @@ const DataIngestion: React.FC = () => {
                 disabled={runningPipeline}
               >
                 <Play size={16} />
-                Run Risk Analysis Pipeline
+                Run Case Analysis
               </button>
               
               {pipelineError && (
@@ -397,7 +397,7 @@ const DataIngestion: React.FC = () => {
                   <span className="progress-pct">{pipelineProgress}%</span>
                 </div>
               </div>
-              <h4 className="pipeline-status-lbl">Processing Database Pipeline...</h4>
+              <h4 className="pipeline-status-lbl">Processing case data...</h4>
               <p className="pipeline-step-desc">{pipelineStep}</p>
               <div className="progress-bar-bg">
                 <div 
@@ -416,8 +416,8 @@ const DataIngestion: React.FC = () => {
 
       {/* Real File Upload Dropzone Section */}
       <div className="card upload-workbench-card">
-        <h3 className="card-title">Database Ingestion Portal</h3>
-        <p className="card-desc">Select a target table and drop a CSV file to update operational datasets.</p>
+        <h3 className="card-title">Data Intake Portal</h3>
+        <p className="card-desc">Upload claims and provider files to refresh the live investigation dataset.</p>
         
         {/* Upload Segment Tabs */}
         <div className="upload-tabs-row">
@@ -451,16 +451,16 @@ const DataIngestion: React.FC = () => {
         >
           <UploadCloud size={40} className="upload-icon" />
           <h3>
-            {activeUploadType === 'claims' && 'Upload Claims Dataset (claims.csv)'}
-            {activeUploadType === 'beneficiary' && 'Upload Beneficiary Dataset (beneficiary.csv)'}
-            {activeUploadType === 'provider' && 'Upload Provider Labels (provider.csv)'}
+            {activeUploadType === 'claims' && 'Upload Claims Data (claims.csv)'}
+            {activeUploadType === 'beneficiary' && 'Upload Beneficiary Data (beneficiary.csv)'}
+            {activeUploadType === 'provider' && 'Upload Provider Reference Data (provider.csv)'}
           </h3>
           <p>
-            {activeUploadType === 'claims' && 'Requires columns: ClaimID, BeneID, Provider, InscClaimAmtReimbursed'}
-            {activeUploadType === 'beneficiary' && 'Requires columns: BeneID, DOB, Gender, Race, State, County'}
-            {activeUploadType === 'provider' && 'Requires columns: Provider'}
+            {activeUploadType === 'claims' && 'Required columns: ClaimID, BeneID, Provider, InscClaimAmtReimbursed'}
+            {activeUploadType === 'beneficiary' && 'Required columns: BeneID, DOB, Gender, Race, State, County'}
+            {activeUploadType === 'provider' && 'Required columns: Provider'}
           </p>
-          <p className="subtext">Drag and drop file here or click to browse (CSV format only, max 200MB)</p>
+          <p className="subtext">Drag and drop a CSV file here or click to browse (max 200MB)</p>
           
           <input 
             type="file" 
@@ -480,7 +480,7 @@ const DataIngestion: React.FC = () => {
           {Object.entries(uploads).map(([key, u]) => (
             <div className={`upload-status-tile status-${u.status}`} key={key}>
               <div className="tile-main">
-                <span className="tile-lbl text-capitalize">{key} Dataset</span>
+                <span className="tile-lbl text-capitalize">{key} Data File</span>
                 {u.status === 'idle' && <span className="tile-status-txt">No file uploaded</span>}
                 {u.status === 'uploading' && (
                   <div className="tile-progress-flex">

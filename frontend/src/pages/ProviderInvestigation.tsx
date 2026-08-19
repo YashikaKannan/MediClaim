@@ -25,7 +25,10 @@ import {
   PolarGrid,
   PolarAngleAxis,
   PolarRadiusAxis,
-  Radar
+  Radar,
+  LineChart,
+  Line,
+  Legend
 } from 'recharts';
 import { getApiUrl } from '../config';
 import './ProviderInvestigation.css';
@@ -70,6 +73,31 @@ interface ProviderDetails {
     beneficiary_percentile: number;
   };
   reasons: string[];
+  explanation?: {
+    risk_score: number;
+    risk_category: string;
+    priority: string;
+    why_flagged: string[];
+    why_suspicious: string[];
+    peer_comparison: string[];
+    billing_behaviour_summary: string[];
+    temporal_drift_findings: string[];
+    financial_impact: string[];
+    recommended_action: string;
+    ai_summary: string;
+  };
+  drift?: {
+    drift_score: number;
+    drift_level: string;
+    claims_spike_ratio: number;
+    reimbursement_spike_ratio: number;
+    coding_shift_index: number;
+    historical_monthly_data: Array<{
+      month: string;
+      claims: number;
+      reimbursement: number;
+    }>;
+  };
 }
 
 const ProviderInvestigation: React.FC = () => {
@@ -199,16 +227,16 @@ const ProviderInvestigation: React.FC = () => {
     );
   }
 
-  const { profile, model_scores, peer_benchmarks, reasons } = data;
+  const { profile, model_scores, peer_benchmarks, reasons, drift, explanation } = data;
 
-  // Radar chart data for individual models
+  // Radar chart data for investigation signals
   const radarData = [
-    { subject: 'CatBoost', score: model_scores.catboost_score || 0 },
-    { subject: 'Isolation Forest', score: model_scores.isolation_score || 0 },
-    { subject: 'LOF', score: model_scores.lof_score || 0 },
-    { subject: 'Robust Z-Score', score: model_scores.statistical_score || 0 },
-    { subject: 'Peer Benchmarking', score: model_scores.peer_score || 0 },
-    { subject: 'LEIE Match', score: model_scores.leie_score || 0 }
+    { subject: 'Historical Pattern', score: model_scores.catboost_score || 0 },
+    { subject: 'Outlier Review', score: model_scores.isolation_score || 0 },
+    { subject: 'Peer Deviation', score: model_scores.lof_score || 0 },
+    { subject: 'Statistical Deviation', score: model_scores.statistical_score || 0 },
+    { subject: 'Peer Comparison', score: model_scores.peer_score || 0 },
+    { subject: 'Exclusion Match', score: model_scores.leie_score || 0 }
   ];
 
   // Bar chart data for peer ratios
@@ -238,7 +266,7 @@ const ProviderInvestigation: React.FC = () => {
             <div className="profile-title-row">
               <h2>Provider {profile.provider_id}</h2>
               <span className={`badge badge-${profile.risk_level.toLowerCase()}`}>
-                {profile.risk_score.toFixed(1)} / {profile.risk_level} Risk
+                {profile.risk_score.toFixed(1)} Risk Score / {profile.risk_level}
               </span>
               {profile.PotentialFraud === 1 && (
                 <span className="badge badge-critical fraud-label">
@@ -268,7 +296,7 @@ const ProviderInvestigation: React.FC = () => {
           onClick={() => navigate('/assistant', { state: { providerId: profile.provider_id } })}
         >
           <MessageSquareCode size={16} />
-          Consult AI Assistant
+          Consult AI Investigation Copilot
         </button>
       </div>
 
@@ -278,8 +306,8 @@ const ProviderInvestigation: React.FC = () => {
         <div className="provider-left-col">
           {/* Risk Model Breakdown */}
           <div className="card breakdown-card">
-            <h3 className="section-title">Algorithmic Risk Signature</h3>
-            <p className="section-desc">Multi-layered anomaly scoring profiles comparing unsupervised and supervised algorithms.</p>
+            <h3 className="section-title">Investigation Signal Overview</h3>
+            <p className="section-desc">Risk signals reviewed across the provider’s historical and peer comparison patterns.</p>
             
             <div className="breakdown-content">
               {/* Radar chart */}
@@ -304,42 +332,42 @@ const ProviderInvestigation: React.FC = () => {
               <div className="signals-metrics-list">
                 <div className="signal-progress-row">
                   <div className="progress-lbl-container">
-                    <span>CatBoost Classifier Score</span>
+                    <span>Historical Pattern Score</span>
                     <span className="bold">{(model_scores.catboost_score || 0).toFixed(1)}%</span>
                   </div>
                   <div className="progress-bg"><div className="progress-fg purple" style={{width: `${model_scores.catboost_score || 0}%`}}></div></div>
                 </div>
                 <div className="signal-progress-row">
                   <div className="progress-lbl-container">
-                    <span>Isolation Forest Outlier Score</span>
+                    <span>Outlier Review Score</span>
                     <span className="bold">{(model_scores.isolation_score || 0).toFixed(1)}%</span>
                   </div>
                   <div className="progress-bg"><div className="progress-fg blue" style={{width: `${model_scores.isolation_score || 0}%`}}></div></div>
                 </div>
                 <div className="signal-progress-row">
                   <div className="progress-lbl-container">
-                    <span>Local Outlier Factor (LOF) Score</span>
+                    <span>Peer Deviation Score</span>
                     <span className="bold">{(model_scores.lof_score || 0).toFixed(1)}%</span>
                   </div>
                   <div className="progress-bg"><div className="progress-fg blue" style={{width: `${model_scores.lof_score || 0}%`}}></div></div>
                 </div>
                 <div className="signal-progress-row">
                   <div className="progress-lbl-container">
-                    <span>Robust Z-Score Engine Deviation</span>
+                    <span>Statistical Deviation Score</span>
                     <span className="bold">{(model_scores.statistical_score || 0).toFixed(1)}%</span>
                   </div>
                   <div className="progress-bg"><div className="progress-fg orange" style={{width: `${model_scores.statistical_score || 0}%`}}></div></div>
                 </div>
                 <div className="signal-progress-row">
                   <div className="progress-lbl-container">
-                    <span>Peer Benchmarking Engine Variance</span>
+                    <span>Peer Comparison Score</span>
                     <span className="bold">{(model_scores.peer_score || 0).toFixed(1)}%</span>
                   </div>
                   <div className="progress-bg"><div className="progress-fg teal" style={{width: `${model_scores.peer_score || 0}%`}}></div></div>
                 </div>
                 <div className="signal-progress-row">
                   <div className="progress-lbl-container">
-                    <span>LEIE Exclusion Screening Match</span>
+                    <span>Exclusion Match Score</span>
                     <span className="bold">{(model_scores.leie_score || 0).toFixed(1)}%</span>
                   </div>
                   <div className="progress-bg"><div className="progress-fg red" style={{width: `${model_scores.leie_score || 0}%`}}></div></div>
@@ -350,8 +378,8 @@ const ProviderInvestigation: React.FC = () => {
 
           {/* Peer Ratios */}
           <div className="card peer-card">
-            <h3 className="section-title">Peer Group Benchmarking</h3>
-            <p className="section-desc">Comparison against provider peer medians. A value of **1.0x** is equal to peer median billing.</p>
+            <h3 className="section-title">Peer Comparison</h3>
+            <p className="section-desc">Comparison against similar providers in the same operational and service profile.</p>
             
             <div className="peer-content">
               <div className="peer-chart-container">
@@ -393,6 +421,55 @@ const ProviderInvestigation: React.FC = () => {
                 </div>
               </div>
             </div>
+            
+            {/* Temporal Drift Card */}
+            {drift && drift.historical_monthly_data && drift.historical_monthly_data.length > 0 && (
+              <div className="card drift-card" style={{ marginTop: '1.5rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                  <h3 className="section-title">Temporal Behavioral Drift</h3>
+                  <span className={`badge badge-${drift.drift_level.toLowerCase()}`}>
+                    Drift Level: {drift.drift_level} ({drift.drift_score.toFixed(1)})
+                  </span>
+                </div>
+                <p className="section-desc">Month-over-month trend analysis of claim frequency and reimbursement value showing behavior deviation.</p>
+                
+                <div className="drift-chart-container" style={{ marginTop: '1rem', background: 'rgba(255, 255, 255, 0.02)', padding: '1rem 0.5rem 0.5rem 0.5rem', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                  <ResponsiveContainer width="100%" height={220}>
+                    <LineChart data={drift.historical_monthly_data} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.05)" />
+                      <XAxis dataKey="month" stroke="#94a3b8" fontSize={10} />
+                      <YAxis yAxisId="left" orientation="left" stroke="#3b82f6" fontSize={10} />
+                      <YAxis yAxisId="right" orientation="right" stroke="#10b981" fontSize={10} />
+                      <Tooltip 
+                        contentStyle={{ backgroundColor: '#11182c', borderColor: 'rgba(255,255,255,0.08)', borderRadius: '8px' }}
+                        itemStyle={{ color: '#fff' }}
+                      />
+                      <Legend wrapperStyle={{ fontSize: '11px', marginTop: '10px' }} />
+                      <Line yAxisId="left" type="monotone" dataKey="claims" stroke="#3b82f6" name="Claims count" strokeWidth={2.5} activeDot={{ r: 8 }} />
+                      <Line yAxisId="right" type="monotone" dataKey="reimbursement" stroke="#10b981" name="Reimbursements ($)" strokeWidth={2.5} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginTop: '1rem' }}>
+                  <div className="ratio-tile" style={{ textAlign: 'center' }}>
+                    <p className="tile-label" style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Claims Spike Ratio</p>
+                    <p className="tile-value" style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--accent-blue)', margin: '0.2rem 0' }}>{drift.claims_spike_ratio.toFixed(2)}x</p>
+                    <p className="tile-sub" style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>vs. prior months median</p>
+                  </div>
+                  <div className="ratio-tile" style={{ textAlign: 'center' }}>
+                    <p className="tile-label" style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Reimbursement Spike</p>
+                    <p className="tile-value" style={{ fontSize: '1.2rem', fontWeight: 700, color: '#10b981', margin: '0.2rem 0' }}>{drift.reimbursement_spike_ratio.toFixed(2)}x</p>
+                    <p className="tile-sub" style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>vs. prior months median</p>
+                  </div>
+                  <div className="ratio-tile" style={{ textAlign: 'center' }}>
+                    <p className="tile-label" style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Coding Shift Index</p>
+                    <p className="tile-value" style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--accent-purple)', margin: '0.2rem 0' }}>{drift.coding_shift_index.toFixed(2)}</p>
+                    <p className="tile-sub" style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Procedure billing shifts</p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -402,9 +479,9 @@ const ProviderInvestigation: React.FC = () => {
           <div className="card reasons-card">
             <h3 className="section-title">
               <Sparkles className="spark-icon" />
-              Automated Fraud Evidence
+              Evidence Summary
             </h3>
-            <p className="section-desc">Heuristics-grounded and model-based evidence justifying the flagged category.</p>
+            <p className="section-desc">Key indicators and supporting review findings behind the current case risk.</p>
             
             <div className="reasons-list">
               {reasons.length === 0 ? (
@@ -421,6 +498,32 @@ const ProviderInvestigation: React.FC = () => {
               )}
             </div>
           </div>
+
+          {explanation && (
+            <div className="card reasons-card business-explanation-card">
+              <h3 className="section-title">Investigation Summary</h3>
+              <div className="profile-meta-row" style={{ marginBottom: '0.75rem' }}>
+                <span className={`badge badge-${explanation.risk_category.toLowerCase()}`}>{explanation.risk_category} Risk</span>
+                <span className="badge status-review">Priority {explanation.priority}</span>
+              </div>
+              <div className="profile-meta-row" style={{ display: 'grid', gap: '0.25rem', alignItems: 'start', marginBottom: '0.75rem' }}>
+                <span><strong>Risk Score:</strong> {explanation.risk_score}</span>
+                <span><strong>Risk Category:</strong> {explanation.risk_category}</span>
+                <span><strong>Investigation Priority:</strong> {explanation.priority}</span>
+              </div>
+              <p className="section-desc">{explanation.ai_summary}</p>
+              <h4>Why Flagged</h4>
+              <ul>{explanation.why_flagged.map((item) => <li key={item}>{item}</li>)}</ul>
+              <h4>Why Suspicious</h4>
+              <ul>{explanation.why_suspicious.map((item) => <li key={item}>{item}</li>)}</ul>
+              <h4>Peer Comparison</h4>
+              <ul>{explanation.peer_comparison.map((item) => <li key={item}>{item}</li>)}</ul>
+              <h4>Financial Impact</h4>
+              <ul>{explanation.financial_impact.map((item) => <li key={item}>{item}</li>)}</ul>
+              <h4>Recommended Action</h4>
+              <p className="reason-text">{explanation.recommended_action}</p>
+            </div>
+          )}
 
           {/* Clinical Audit Status & Notes */}
           <div className="card audit-card">

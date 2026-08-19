@@ -68,6 +68,15 @@ def init_database():
     )
     """)
 
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS provider_explanations (
+        provider_id TEXT PRIMARY KEY,
+        explanation_json TEXT NOT NULL,
+        generated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY(provider_id) REFERENCES providers(provider_id)
+    )
+    """)
+
     # 5. investigations table (with assigned_investigator)
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS investigations (
@@ -80,23 +89,54 @@ def init_database():
     )
     """)
 
-    # 6. claims table (new)
+    # 6. claims table (new schema)
+    try:
+        cursor.execute("SELECT business_interpretation FROM claims LIMIT 1")
+    except sqlite3.OperationalError:
+        print("Dropping old claims table for schema upgrade...")
+        cursor.execute("DROP TABLE IF EXISTS claims")
+
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS claims (
         claim_id TEXT PRIMARY KEY,
         provider_id TEXT,
         bene_id TEXT,
         risk_score REAL,
-        fraud_flag INTEGER,
-        explanation TEXT,
-        suspicious_codes TEXT,
+        risk_category TEXT,
+        is_anomaly INTEGER,
+        explanation_1 TEXT,
+        explanation_2 TEXT,
+        explanation_3 TEXT,
+        business_interpretation TEXT,
+        explanation_json TEXT,
         claim_amount REAL,
         claim_type TEXT,
+        claim_date TEXT,
         FOREIGN KEY(provider_id) REFERENCES providers(provider_id)
     )
     """)
 
-    # 7. uploads table (new)
+    try:
+        cursor.execute("SELECT explanation_json FROM claims LIMIT 1")
+    except sqlite3.OperationalError:
+        cursor.execute("ALTER TABLE claims ADD COLUMN explanation_json TEXT")
+
+    # 7. provider_drift table (new)
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS provider_drift (
+        provider_id TEXT PRIMARY KEY,
+        drift_score REAL,
+        drift_level TEXT,
+        claims_spike_ratio REAL,
+        reimbursement_spike_ratio REAL,
+        coding_shift_index REAL,
+        historical_monthly_data TEXT,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY(provider_id) REFERENCES providers(provider_id)
+    )
+    """)
+
+    # 8. uploads table (new)
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS uploads (
         id INTEGER PRIMARY KEY AUTOINCREMENT,

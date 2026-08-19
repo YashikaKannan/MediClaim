@@ -111,8 +111,8 @@ const Settings: React.FC = () => {
     <div className="settings-page animate-fade-in">
       <div className="page-header">
         <div>
-          <h1 className="page-title">System Settings</h1>
-          <p className="page-subtitle">Configure backend connections, risk weighting factors, and severity thresholds.</p>
+          <h1 className="page-title">Investigation Settings</h1>
+          <p className="page-subtitle">Configure backend access, risk signal weights, and case escalation thresholds.</p>
         </div>
       </div>
 
@@ -142,15 +142,15 @@ const Settings: React.FC = () => {
         <div className="card settings-card">
           <h3 className="section-title">
             <Sliders size={18} className="settings-icon-purple" />
-            Risk score Calibration weights
+            Risk Signal Calibration
           </h3>
-          <p className="section-desc">Tune the coefficients for the multi-signal risk scoring fusion engine (must equal 100%).</p>
+          <p className="section-desc">Adjust the weighting of review signals used to prioritize provider cases (must equal 100%).</p>
           
           <div className="weights-sliders-container">
             {/* CatBoost */}
             <div className="slider-group">
               <div className="slider-header">
-                <span>CatBoost Classifier Weight</span>
+                <span>Historical Pattern Weight</span>
                 <span className="slider-val">{catboostWeight}%</span>
               </div>
               <input 
@@ -165,7 +165,7 @@ const Settings: React.FC = () => {
             {/* Isolation Forest */}
             <div className="slider-group">
               <div className="slider-header">
-                <span>Isolation Forest Weight</span>
+                <span>Outlier Review Weight</span>
                 <span className="slider-val">{iforestWeight}%</span>
               </div>
               <input 
@@ -180,7 +180,7 @@ const Settings: React.FC = () => {
             {/* LOF */}
             <div className="slider-group">
               <div className="slider-header">
-                <span>Local Outlier Factor (LOF) Weight</span>
+                <span>Peer Deviation Weight</span>
                 <span className="slider-val">{lofWeight}%</span>
               </div>
               <input 
@@ -195,7 +195,7 @@ const Settings: React.FC = () => {
             {/* Robust Z-Score */}
             <div className="slider-group">
               <div className="slider-header">
-                <span>Robust Z-Score Weight</span>
+                <span>Statistical Deviation Weight</span>
                 <span className="slider-val">{robustZWeight}%</span>
               </div>
               <input 
@@ -210,7 +210,7 @@ const Settings: React.FC = () => {
             {/* Peer Benchmarking */}
             <div className="slider-group">
               <div className="slider-header">
-                <span>Peer Benchmarking Weight</span>
+                <span>Peer Comparison Weight</span>
                 <span className="slider-val">{peerBenchmarkWeight}%</span>
               </div>
               <input 
@@ -225,7 +225,7 @@ const Settings: React.FC = () => {
             {/* LEIE Exclusion */}
             <div className="slider-group">
               <div className="slider-header">
-                <span>LEIE Exclusion Screening Weight</span>
+                <span>Exclusion Match Weight</span>
                 <span className="slider-val">{leieWeight}%</span>
               </div>
               <input 
@@ -248,13 +248,13 @@ const Settings: React.FC = () => {
         <div className="card settings-card">
           <h3 className="section-title">
             <SlidersHorizontal size={18} className="settings-icon-teal" />
-            Outlier Classification Thresholds
+            Investigation Thresholds
           </h3>
-          <p className="section-desc">Manage standard deviations and classification boundaries used to trigger warnings.</p>
+          <p className="section-desc">Manage the thresholds used to escalate cases for review and intervention.</p>
           
           <div className="thresholds-grid">
             <div className="settings-field">
-              <label className="field-label">Robust Z-Score Cutoff Limit</label>
+              <label className="field-label">Deviation Cutoff Limit</label>
               <input 
                 type="number" 
                 step="0.1" 

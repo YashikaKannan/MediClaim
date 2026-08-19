@@ -15,14 +15,14 @@ const HowItWorks: React.FC = () => {
       <div className="page-header">
         <div>
           <h1 className="page-title">How It Works</h1>
-          <p className="page-subtitle">Inside the MediClaim Multi-Layered Fraud Detection Pipeline & Risk Score Fusion</p>
+          <p className="page-subtitle">Inside the MediClaim fraud investigation workflow and audit intelligence platform</p>
         </div>
       </div>
 
       {/* Visual Pipeline flow chart */}
       <div className="card pipeline-flow-card">
-        <h3 className="section-title">End-to-End Analytical Processing</h3>
-        <p className="section-desc">From raw claim databases to compiled risk indicators and evidence generation.</p>
+        <h3 className="section-title">End-to-End Investigation Workflow</h3>
+        <p className="section-desc">From intake to case review, each workflow stage builds evidence for human investigators.</p>
         
         <div className="flow-steps-container">
           <div className="flow-step">
@@ -45,16 +45,16 @@ const HowItWorks: React.FC = () => {
             <div className="step-icon-box blue">
               <Network size={24} />
             </div>
-            <h4>3. Multi-Layer Scoring</h4>
-            <p>Executes CatBoost, PyTorch Autoencoder, IF, LOF, and Z-score outlier engines.</p>
+            <h4>3. Risk Review</h4>
+            <p>Assesses billing patterns, provider comparisons, and unusual claim behavior to prioritize investigation.</p>
           </div>
           <ArrowRight className="flow-arrow" />
           <div className="flow-step">
             <div className="step-icon-box green">
               <Sparkles size={24} />
             </div>
-            <h4>4. Risk Score Fusion</h4>
-            <p>Applies a weighted formula to compile a 0-100 score and automated justifications.</p>
+            <h4>4. Case Prioritization</h4>
+            <p>Builds a risk score, evidence summary, and recommended next action for investigators.</p>
           </div>
         </div>
       </div>
@@ -65,19 +65,19 @@ const HowItWorks: React.FC = () => {
         <div className="card layer-card">
           <div className="layer-header">
             <span className="layer-num">40% Weight</span>
-            <h3 className="layer-title">ML Detection Layer</h3>
+            <h3 className="layer-title">Pattern Detection Layer</h3>
           </div>
-          <p className="layer-desc">Combines supervised classification and unsupervised clustering models to uncover patterns.</p>
+          <p className="layer-desc">Combines historical risk signals, billing irregularities, and claim anomalies to identify priority cases.</p>
           
           <ul className="layer-bullets">
             <li>
-              <strong>CatBoost Classifier:</strong> Supervised model trained on past potential fraud targets. Capture non-linear billing networks.
+              <strong>Historical Risk Patterning:</strong> Prioritizes providers whose claims behavior resembles previously reviewed suspect patterns.
             </li>
             <li>
-              <strong>PyTorch Autoencoder:</strong> Reconstructs claims features to flag providers with high reconstruction errors (structural anomalies).
+              <strong>Claims Structure Review:</strong> Identifies unusually shaped claim patterns or elevated service concentration.
             </li>
             <li>
-              <strong>Isolation Forest & One-Class SVM:</strong> Isolates provider outliers in high-dimensional space.
+              <strong>Provider Outlier Screening:</strong> Isolates providers whose billing behavior differs materially from peers and historical norms.
             </li>
           </ul>
         </div>
@@ -86,16 +86,16 @@ const HowItWorks: React.FC = () => {
         <div className="card layer-card">
           <div className="layer-header">
             <span className="layer-num">30% Weight</span>
-            <h3 className="layer-title">Statistical Outlier Layer</h3>
+            <h3 className="layer-title">Deviation Review Layer</h3>
           </div>
-          <p className="layer-desc">Uses robust statistical engines to isolate providers whose billing averages deviate significantly from normal benchmarks.</p>
+          <p className="layer-desc">Highlights providers whose billing averages or claim volumes deviate significantly from expected ranges.</p>
           
           <ul className="layer-bullets">
             <li>
-              <strong>Robust Z-Score Engine:</strong> Employs Median and Median Absolute Deviation (MAD) rather than mean/std, making it highly resilient to extreme values.
+              <strong>Statistical Variance Review:</strong> Uses robust comparisons to spot unusual provider behavior without overreacting to a single extreme value.
             </li>
             <li>
-              <strong>Threshold Cutoffs:</strong> Identifies providers with Z-scores &gt; 3.0 (extreme outliers) in mean payouts or volume.
+              <strong>Threshold Alerts:</strong> Identifies substantial claim or reimbursement deviations that warrant investigative review.
             </li>
           </ul>
         </div>
@@ -104,16 +104,16 @@ const HowItWorks: React.FC = () => {
         <div className="card layer-card">
           <div className="layer-header">
             <span className="layer-num">30% Weight</span>
-            <h3 className="layer-title">Peer Benchmarking Layer</h3>
+            <h3 className="layer-title">Peer Comparison Layer</h3>
           </div>
-          <p className="layer-desc">Aggregates medians within specific peer groups (e.g. Outpatient-heavy providers in State 39) to measure relative variance.</p>
+          <p className="layer-desc">Compares providers within similar service and geography cohorts to identify materially unusual activity.</p>
           
           <ul className="layer-bullets">
             <li>
-              <strong>Reimbursement Ratios:</strong> Provider total billing divided by the peer median. Identifies providers billing 10x or 20x the median of their direct neighbors.
+              <strong>Reimbursement Ratios:</strong> Flags providers whose billing substantially exceeds the norm for their peer group.
             </li>
             <li>
-              <strong>State/Specialty Normalization:</strong> Controls for geographical and service variances (e.g. inpatient complexity vs outpatient routines).
+              <strong>State and Specialty Normalization:</strong> Adjusts review for geography and service mix so investigators compare like with like.
             </li>
           </ul>
         </div>
@@ -125,19 +125,19 @@ const HowItWorks: React.FC = () => {
           <FileText size={18} className="text-icon" />
           Automated Reasoning Engine
         </h3>
-        <p className="section-desc">We convert complex mathematical outcomes into human-readable evidence using dynamic rules based on calculated ratios:</p>
+        <p className="section-desc">The platform turns risk signals into plain-language evidence so investigators can quickly understand why a case matters:</p>
         <div className="reason-rules-grid">
           <div className="rule-box">
-            <span className="rule-condition">Ratio &gt; 5x Peer</span>
-            <p className="rule-explanation">Generates flag for disproportionate billing: "Total reimbursement is X times the median of peers in State Y."</p>
+            <span className="rule-condition">Payment Volume &gt; Peers</span>
+            <p className="rule-explanation">Highlights disproportionate billing versus the provider’s peer group.</p>
           </div>
           <div className="rule-box">
-            <span className="rule-condition">CatBoost &gt; 80%</span>
-            <p className="rule-explanation">Generates supervised flag: "Supervised models indicate high correlation with historical fraud patterns."</p>
+            <span className="rule-condition">Historical Pattern Match</span>
+            <p className="rule-explanation">Flags providers whose billing profile resembles prior reviewed fraud or abuse patterns.</p>
           </div>
           <div className="rule-box">
-            <span className="rule-condition">Z-Score &gt; 3.0</span>
-            <p className="rule-explanation">Generates volume outlier flag: "Billed claim count is statistical outlier with robust Z-score of Z."</p>
+            <span className="rule-condition">Behavioral Shift</span>
+            <p className="rule-explanation">Identifies sudden changes in claim volume, reimbursement, or billing mix that need review.</p>
           </div>
         </div>
       </div>

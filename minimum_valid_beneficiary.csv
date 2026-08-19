@@ -1,0 +1,2 @@
+BeneID,DOB,DOD,Gender,Race,State,County,RenalDiseaseIndicator,IPAnnualReimbursementAmt,IPAnnualDeductibleAmt,OPAnnualReimbursementAmt,OPAnnualDeductibleAmt
+BENE_MIN_0001,1940-01-01,,1,1,10,1,0,0,0,100,0

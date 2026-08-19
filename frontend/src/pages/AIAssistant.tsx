@@ -25,6 +25,14 @@ interface ProviderSummary {
   total_claims: number;
 }
 
+interface ClaimBrief {
+  claim_id: string;
+  risk_score: number;
+  is_anomaly: number;
+  claim_amount: number;
+  business_interpretation: string;
+}
+
 const AIAssistant: React.FC = () => {
   const location = useLocation();
   const state = location.state as { providerId?: string } | null;
@@ -32,12 +40,13 @@ const AIAssistant: React.FC = () => {
   const [providerId, setProviderId] = useState(state?.providerId || localStorage.getItem('mediclaim_selected_provider') || '');
   const [providersList, setProvidersList] = useState<string[]>([]);
   const [activeProviderStats, setActiveProviderStats] = useState<ProviderSummary | null>(null);
+  const [providerClaims, setProviderClaims] = useState<ClaimBrief[]>([]);
   
   const [query, setQuery] = useState('');
   const [messages, setMessages] = useState<Message[]>([
     {
       sender: 'ai',
-      text: "Hello! I am your AI Clinical Audit Assistant. Select a Provider ID to begin. I can answer complex inquiries, dissect statistical deviations, and report peer comparison summaries grounded in the clinical claims database.",
+      text: "Hello! I am the AI Investigation Copilot. Select a provider to begin. I can explain the case, summarize risk signals, compare peer activity, and point to the most relevant evidence for review.",
       timestamp: new Date()
     }
   ]);
@@ -89,8 +98,17 @@ const AIAssistant: React.FC = () => {
           total_claims: data.profile.total_claims
         });
       }
+      
+      const claimsRes = await fetch(`${getApiUrl()}/api/v1/claims?provider_id=${id}&page_size=50`);
+      if (claimsRes.ok) {
+        const claimsData = await claimsRes.json();
+        setProviderClaims(claimsData.data || []);
+      } else {
+        setProviderClaims([]);
+      }
     } catch (e) {
       console.error(e);
+      setProviderClaims([]);
     }
   };
 
@@ -102,7 +120,7 @@ const AIAssistant: React.FC = () => {
     setMessages([
       {
         sender: 'ai',
-        text: `AI Context loaded for Provider **${id}**. Ask me questions about their anomalies, statistical deviations, or how they compare to the local peer group.`,
+        text: `Investigation context loaded for Provider **${id}**. Ask about the risk reasons, peer comparisons, financial impact, or the recommended next action.`,
         timestamp: new Date()
       }
     ]);
@@ -129,7 +147,11 @@ const AIAssistant: React.FC = () => {
 
       if (res.ok) {
         const json = await res.json();
-        setMessages(prev => [...prev, { sender: 'ai', text: json.response, timestamp: new Date() }]);
+        const summary = json.investigation_summary;
+        const structuredResponse = summary
+          ? `${json.response}\n\n### Investigation Summary\n- Risk Score: ${summary.risk_score}/100\n- Risk Category: ${summary.risk_category}\n- Investigation Priority: ${summary.priority}\n\n### Why It Was Flagged\n${summary.why_flagged.map((item: string) => `- ${item}`).join('\\n')}\n\n### Peer Comparison\n${summary.peer_comparison.map((item: string) => `- ${item}`).join('\\n')}\n\n### Financial Impact\n${summary.financial_impact.map((item: string) => `- ${item}`).join('\\n')}\n\n### Recommended Action\n- ${summary.recommended_action}`
+          : json.response;
+        setMessages(prev => [...prev, { sender: 'ai', text: structuredResponse, timestamp: new Date() }]);
       } else {
         setMessages(prev => [...prev, { sender: 'ai', text: "Error: Could not retrieve a response from the API.", timestamp: new Date() }]);
       }
@@ -218,8 +240,8 @@ const AIAssistant: React.FC = () => {
     <div className="assistant-page animate-fade-in">
       <div className="page-header">
         <div>
-          <h1 className="page-title">AI Clinical Audit Assistant</h1>
-          <p className="page-subtitle">Ground clinical investigation queries using trained model parameters and peer statistical matrices.</p>
+          <h1 className="page-title">AI Investigation Copilot</h1>
+          <p className="page-subtitle">AI review assistant using provider history, peer comparisons, and current case evidence to support human investigation decisions.</p>
         </div>
       </div>
 
@@ -284,8 +306,8 @@ const AIAssistant: React.FC = () => {
               <button className="suggestion-chip" onClick={() => suggestQuery("Compare this provider to their peers.")}>
                 Compare to peers
               </button>
-              <button className="suggestion-chip" onClick={() => suggestQuery("Which machine learning models flagged them?")}>
-                Explain ML findings
+              <button className="suggestion-chip" onClick={() => suggestQuery("What are the key risk signals for this provider?")}> 
+                Explain risk signals
               </button>
             </div>
           )}
@@ -346,8 +368,32 @@ const AIAssistant: React.FC = () => {
 
               <div className="sidebar-instruction-box">
                 <Info size={14} className="instruction-icon" />
-                <p>All questions are parsed against pre-calculated state peer statistics and model thresholds for Provider {activeProviderStats.provider_id}.</p>
+                <p>All questions are grounded in provider history, peer comparisons, and current case evidence for Provider {activeProviderStats.provider_id}.</p>
               </div>
+
+              {providerClaims && providerClaims.length > 0 && (
+                <div className="sidebar-claims-rag" style={{ marginTop: '1.25rem', borderTop: '1px solid var(--border-color)', paddingTop: '1rem' }}>
+                  <h4 style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                    <HeartPulse size={14} style={{ color: 'var(--accent-blue)' }} />
+                    Claim-Level Audits ({providerClaims.filter(c => c.is_anomaly).length} flagged)
+                  </h4>
+                  <div style={{ maxHeight: '220px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.5rem', paddingRight: '4px' }}>
+                    {providerClaims.map((c) => (
+                      <div key={c.claim_id} style={{ background: 'rgba(255, 255, 255, 0.5)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.5rem', fontSize: '0.75rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+                          <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{c.claim_id}</span>
+                          <span className={`badge ${c.is_anomaly ? 'btn-danger' : 'status-resolved'}`} style={{ color: c.is_anomaly ? '#fff' : '', fontSize: '0.65rem', padding: '0.1rem 0.4rem' }}>
+                            Score: {c.risk_score.toFixed(0)}
+                          </span>
+                        </div>
+                        <p style={{ color: 'var(--text-secondary)', fontStyle: 'italic', lineHeight: '1.3' }}>
+                          {c.business_interpretation || 'No automated interpretation generated.'}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
             <div className="empty-sidebar-context">

@@ -30,9 +30,28 @@ interface ProviderItem {
   priority_score?: number;
 }
 
+interface ClaimItem {
+  claim_id: string;
+  provider_id: string;
+  bene_id: string;
+  risk_score: number;
+  risk_category: string;
+  is_anomaly: number;
+  explanation_1: string;
+  explanation_2: string;
+  explanation_3: string;
+  business_interpretation: string;
+  claim_amount: number;
+  claim_type: string;
+  claim_date: string;
+}
+
 const InvestigationQueue: React.FC = () => {
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState<'providers' | 'claims'>('providers');
+  
   const [providers, setProviders] = useState<ProviderItem[]>([]);
+  const [claims, setClaims] = useState<ClaimItem[]>([]);
   const [loading, setLoading] = useState(true);
   
   // Search & Filters
@@ -51,25 +70,51 @@ const InvestigationQueue: React.FC = () => {
   const [totalRecords, setTotalRecords] = useState(0);
   const pageSize = 15;
 
+  // Reset page and search when active tab changes
+  useEffect(() => {
+    setPage(1);
+    setSearch('');
+    setRiskLevel('');
+    if (activeTab === 'claims') {
+      setSortBy('risk_score');
+    } else {
+      setSortBy('priority_score');
+    }
+  }, [activeTab]);
+
   useEffect(() => {
     fetchQueue();
-  }, [page, riskLevel, providerType, stateFilter, sortBy, sortOrder]);
+  }, [page, riskLevel, providerType, stateFilter, sortBy, sortOrder, activeTab]);
 
   const fetchQueue = async () => {
     try {
       setLoading(true);
-      let queryParams = `page=${page}&page_size=${pageSize}&sort_by=${sortBy}&sort_order=${sortOrder}`;
-      if (search) queryParams += `&search=${search}`;
-      if (riskLevel) queryParams += `&risk_level=${riskLevel}`;
-      if (providerType) queryParams += `&provider_type=${providerType}`;
-      if (stateFilter) queryParams += `&state=${stateFilter}`;
-      
-      const res = await fetch(`${getApiUrl()}/api/v1/providers?${queryParams}`);
-      if (res.ok) {
-        const json = await res.json();
-        setProviders(json.data);
-        setTotalPages(json.total_pages);
-        setTotalRecords(json.total_records);
+      if (activeTab === 'providers') {
+        let queryParams = `page=${page}&page_size=${pageSize}&sort_by=${sortBy}&sort_order=${sortOrder}`;
+        if (search) queryParams += `&search=${search}`;
+        if (riskLevel) queryParams += `&risk_level=${riskLevel}`;
+        if (providerType) queryParams += `&provider_type=${providerType}`;
+        if (stateFilter) queryParams += `&state=${stateFilter}`;
+        
+        const res = await fetch(`${getApiUrl()}/api/v1/providers?${queryParams}`);
+        if (res.ok) {
+          const json = await res.json();
+          setProviders(json.data);
+          setTotalPages(json.total_pages);
+          setTotalRecords(json.total_records);
+        }
+      } else {
+        let queryParams = `page=${page}&page_size=${pageSize}&sort_by=${sortBy === 'priority_score' ? 'risk_score' : sortBy}&sort_order=${sortOrder}`;
+        if (search) queryParams += `&search=${search}`;
+        if (riskLevel) queryParams += `&risk_level=${riskLevel}`;
+        
+        const res = await fetch(`${getApiUrl()}/api/v1/claims?${queryParams}`);
+        if (res.ok) {
+          const json = await res.json();
+          setClaims(json.data);
+          setTotalPages(json.total_pages);
+          setTotalRecords(json.total_records);
+        }
       }
     } catch (e) {
       console.error('Error fetching queue:', e);
@@ -99,12 +144,33 @@ const InvestigationQueue: React.FC = () => {
       <div className="page-header">
         <div>
           <h1 className="page-title">Investigation Queue</h1>
-          <p className="page-subtitle">Prioritized backlog of healthcare providers flagged for potential fraud, waste, or abuse.</p>
+          <p className="page-subtitle">Prioritized backlog of healthcare providers and claim-level anomalies flagged for potential fraud, waste, or abuse.</p>
         </div>
         <div className="queue-stats">
           <span className="queue-badge-lbl">Total Flagged:</span>
-          <span className="queue-badge-val">{totalRecords.toLocaleString()} Providers</span>
+          <span className="queue-badge-val">
+            {activeTab === 'providers' ? `${totalRecords.toLocaleString()} Providers` : `${totalRecords.toLocaleString()} Claims`}
+          </span>
         </div>
+      </div>
+
+      {/* Queue View Switcher */}
+      <div className="card" style={{ padding: '0.75rem 1.25rem', display: 'flex', gap: '0.75rem', alignItems: 'center', border: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.7)' }}>
+        <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-secondary)' }}>View Mode:</span>
+        <button 
+          className={`btn ${activeTab === 'providers' ? 'btn-primary' : 'btn-secondary'}`}
+          onClick={() => setActiveTab('providers')}
+          style={{ padding: '0.45rem 1.15rem', fontSize: '0.8rem', borderRadius: '8px' }}
+        >
+          Providers Backlog
+        </button>
+        <button 
+          className={`btn ${activeTab === 'claims' ? 'btn-primary' : 'btn-secondary'}`}
+          onClick={() => setActiveTab('claims')}
+          style={{ padding: '0.45rem 1.15rem', fontSize: '0.8rem', borderRadius: '8px' }}
+        >
+          Claims Triage List
+        </button>
       </div>
 
       {/* Filter Bar */}
@@ -114,7 +180,7 @@ const InvestigationQueue: React.FC = () => {
             <Search size={18} className="search-icon" />
             <input 
               type="text" 
-              placeholder="Search by Provider ID (e.g. PRV51003)..."
+              placeholder={activeTab === 'providers' ? "Search by Provider ID (e.g. PRV51003)..." : "Search by Claim ID or Provider ID..."}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -137,27 +203,31 @@ const InvestigationQueue: React.FC = () => {
             </select>
           </div>
 
-          <div className="filter-group">
-            <Filter size={14} className="filter-group-icon" />
-            <span className="filter-label">Facility Type</span>
-            <select value={providerType} onChange={(e) => { setProviderType(e.target.value); setPage(1); }}>
-              <option value="">All Types</option>
-              <option value="Inpatient-heavy">Inpatient-Heavy</option>
-              <option value="Outpatient-heavy">Outpatient-Heavy</option>
-            </select>
-          </div>
+          {activeTab === 'providers' && (
+            <>
+              <div className="filter-group">
+                <Filter size={14} className="filter-group-icon" />
+                <span className="filter-label">Facility Type</span>
+                <select value={providerType} onChange={(e) => { setProviderType(e.target.value); setPage(1); }}>
+                  <option value="">All Types</option>
+                  <option value="Inpatient-heavy">Inpatient-Heavy</option>
+                  <option value="Outpatient-heavy">Outpatient-Heavy</option>
+                </select>
+              </div>
 
-          <div className="filter-group">
-            <Filter size={14} className="filter-group-icon" />
-            <span className="filter-label">Operating State</span>
-            <input 
-              type="number" 
-              placeholder="e.g. 39" 
-              className="state-filter-input"
-              value={stateFilter} 
-              onChange={(e) => { setStateFilter(e.target.value); setPage(1); }} 
-            />
-          </div>
+              <div className="filter-group">
+                <Filter size={14} className="filter-group-icon" />
+                <span className="filter-label">Operating State</span>
+                <input 
+                  type="number" 
+                  placeholder="e.g. 39" 
+                  className="state-filter-input"
+                  value={stateFilter} 
+                  onChange={(e) => { setStateFilter(e.target.value); setPage(1); }} 
+                />
+              </div>
+            </>
+          )}
         </div>
       </div>
 
@@ -168,11 +238,11 @@ const InvestigationQueue: React.FC = () => {
             <RefreshCw size={24} className="spinning" />
             <p>Fetching queue records...</p>
           </div>
-        ) : providers.length === 0 ? (
+        ) : (activeTab === 'providers' ? providers.length : claims.length) === 0 ? (
           <div className="empty-table">
-            <p>No providers match the selected search criteria or filters.</p>
+            <p>No records match the selected search criteria or filters.</p>
           </div>
-        ) : (
+        ) : activeTab === 'providers' ? (
           <>
             <div className="table-container">
               <table>
@@ -248,34 +318,114 @@ const InvestigationQueue: React.FC = () => {
                 </tbody>
               </table>
             </div>
+          </>
+        ) : (
+          <>
+            <div className="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Claim ID</th>
+                    <th>Beneficiary ID</th>
+                    <th>Provider ID</th>
+                    <th onClick={() => toggleSort('claim_amount')} className="sortable-th">
+                      Claim Amount <ArrowUpDown size={12} />
+                    </th>
+                    <th>Type</th>
+                    <th>Claim Date</th>
+                    <th onClick={() => toggleSort('risk_score')} className="sortable-th">
+                      Risk Score <ArrowUpDown size={12} />
+                    </th>
+                    <th>Status</th>
+                    <th>Business Interpretation (RAG Explanations)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {claims.map((c) => {
+                    let rLevel = 'low';
+                    if (c.risk_score >= 85) rLevel = 'critical';
+                    else if (c.risk_score >= 65) rLevel = 'high';
+                    else if (c.risk_score >= 35) rLevel = 'medium';
 
-            {/* Pagination Controls */}
-            <div className="pagination-controls">
-              <span className="pagination-info">
-                Showing page <strong>{page}</strong> of <strong>{totalPages}</strong> ({totalRecords.toLocaleString()} total providers)
-              </span>
-              
-              <div className="pagination-buttons">
-                <button 
-                  className="btn btn-secondary btn-sm"
-                  onClick={() => setPage(p => Math.max(1, p - 1))}
-                  disabled={page === 1}
-                >
-                  <ChevronLeft size={16} />
-                  Prev
-                </button>
-                <button 
-                  className="btn btn-secondary btn-sm"
-                  onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                  disabled={page === totalPages}
-                >
-                  Next
-                  <ChevronRight size={16} />
-                </button>
-              </div>
+                    return (
+                      <tr key={c.claim_id}>
+                        <td>
+                          <span className="provider-code" style={{ color: 'var(--accent-blue)', fontWeight: 700 }}>
+                            {c.claim_id}
+                          </span>
+                        </td>
+                        <td>{c.bene_id}</td>
+                        <td>
+                          <button 
+                            className="btn btn-secondary btn-sm"
+                            style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem', fontWeight: 600 }}
+                            onClick={() => {
+                              localStorage.setItem('mediclaim_selected_provider', c.provider_id);
+                              window.dispatchEvent(new Event('mediclaim-provider-selected'));
+                              navigate(`/provider/${c.provider_id}`);
+                            }}
+                          >
+                            {c.provider_id}
+                          </button>
+                        </td>
+                        <td>
+                          {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(c.claim_amount || 0)}
+                        </td>
+                        <td>
+                          <span className={`badge ${c.claim_type === 'Inpatient' ? 'status-new' : 'status-resolved'}`} style={{ fontSize: '0.7rem' }}>
+                            {c.claim_type || 'Outpatient'}
+                          </span>
+                        </td>
+                        <td>{c.claim_date || 'N/A'}</td>
+                        <td>
+                          <span className={`badge badge-${rLevel}`}>
+                            {Number(c.risk_score || 0).toFixed(1)}
+                          </span>
+                        </td>
+                        <td>
+                          <span className={`badge ${c.is_anomaly ? 'btn-danger' : 'status-resolved'}`} style={{ color: c.is_anomaly ? '#fff' : '', fontSize: '0.7rem' }}>
+                            {c.is_anomaly ? 'Anomaly' : 'Normal'}
+                          </span>
+                        </td>
+                        <td style={{ maxWidth: '350px', fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
+                          <div style={{ maxHeight: '60px', overflowY: 'auto', paddingRight: '4px' }}>
+                            {c.business_interpretation || 'No interpretation generated.'}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           </>
         )}
+
+        {/* Pagination Controls */}
+        <div className="pagination-controls">
+          <span className="pagination-info">
+            Showing page <strong>{page}</strong> of <strong>{totalPages}</strong> ({totalRecords.toLocaleString()} total records)
+          </span>
+          
+          <div className="pagination-buttons">
+            <button 
+              className="btn btn-secondary btn-sm"
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={page === 1}
+            >
+              <ChevronLeft size={16} />
+              Prev
+            </button>
+            <button 
+              className="btn btn-secondary btn-sm"
+              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+              disabled={page === totalPages}
+            >
+              Next
+              <ChevronRight size={16} />
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

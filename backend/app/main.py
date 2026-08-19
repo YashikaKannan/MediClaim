@@ -7,11 +7,13 @@ import shutil
 import logging
 import csv
 import io
+import json
 from datetime import datetime, timezone
 from typing import List, Optional
 import numpy as np
 import google.generativeai as genai
 from app.pipeline import run_risk_pipeline, pipeline_status
+from app.explanation_service import build_claim_explanation, build_provider_explanation
 
 # Setup logger
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
@@ -37,7 +39,53 @@ def get_db_connection():
         raise HTTPException(status_code=500, detail="Database file not found. Run training/pipeline first.")
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS provider_explanations (
+            provider_id TEXT PRIMARY KEY,
+            explanation_json TEXT NOT NULL,
+            generated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+    try:
+        cursor.execute("SELECT explanation_json FROM claims LIMIT 1")
+    except sqlite3.OperationalError:
+        cursor.execute("ALTER TABLE claims ADD COLUMN explanation_json TEXT")
+    conn.commit()
     return conn
+
+def parse_explanation(value):
+    if not value:
+        return None
+    try:
+        return json.loads(value)
+    except (TypeError, json.JSONDecodeError):
+        return None
+
+def self_explain_claim(claim, cursor, claim_amounts):
+    claim["explanation"] = parse_explanation(claim.get("explanation_json"))
+    if claim["explanation"] is not None:
+        return claim
+    provider_row = cursor.execute(
+        "SELECT provider_id, risk_score, risk_level, total_reimbursement FROM providers WHERE provider_id = ?",
+        (claim.get("provider_id"),),
+    ).fetchone()
+    peer_row = cursor.execute(
+        "SELECT reimbursement_ratio FROM peer_benchmarks WHERE provider_id = ?",
+        (claim.get("provider_id"),),
+    ).fetchone()
+    provider = dict(provider_row) if provider_row else {}
+    provider["reimbursement_ratio"] = peer_row["reimbursement_ratio"] if peer_row else 1.0
+    amounts = claim_amounts.get(claim.get("claim_type") or "Unknown", [])
+    median = float(np.median(amounts)) if amounts else float(claim.get("claim_amount") or 0)
+    claim["explanation"] = build_claim_explanation(
+        claim,
+        provider,
+        median,
+        [claim.get("explanation_1"), claim.get("explanation_2"), claim.get("explanation_3")],
+        len(amounts),
+    )
+    return claim
 
 # Pydantic models
 class StatusUpdateRequest(BaseModel):
@@ -395,6 +443,8 @@ def list_providers(
         for row in rows:
             d = dict(row)
             d["priority_score"] = (d["risk_score"] or 0.0) * (d["total_reimbursement"] or 0.0) / 100.0  # Normalized Priority Score
+            if "explanation_json" in d:
+                d["explanation"] = parse_explanation(d["explanation_json"])
             result_data.append(d)
             
         return {
@@ -439,13 +489,69 @@ def get_provider_details(provider_id: str):
         # Explanations
         cursor.execute("SELECT reason FROM explanations WHERE provider_id = ?", (provider_id,))
         reasons = [row["reason"] for row in cursor.fetchall()]
+
+        cursor.execute("SELECT explanation_json FROM provider_explanations WHERE provider_id = ?", (provider_id,))
+        explanation_row = cursor.fetchone()
+        provider_explanation = parse_explanation(explanation_row["explanation_json"]) if explanation_row else None
+        
+        # Provider Drift
+        cursor.execute("SELECT * FROM provider_drift WHERE provider_id = ?", (provider_id,))
+        drift_row = cursor.fetchone()
+        if drift_row:
+            drift = dict(drift_row)
+            try:
+                drift["historical_monthly_data"] = json.loads(drift["historical_monthly_data"])
+            except Exception:
+                drift["historical_monthly_data"] = []
+        else:
+            drift = {
+                "provider_id": provider_id,
+                "drift_score": 0.0,
+                "drift_level": "Low",
+                "claims_spike_ratio": 1.0,
+                "reimbursement_spike_ratio": 1.0,
+                "coding_shift_index": 0.0,
+                "historical_monthly_data": []
+            }
+
+        if provider_explanation is None:
+            provider_explanation = build_provider_explanation(profile, scores, peer, drift, reasons)
         
         return {
             "profile": profile,
             "model_scores": scores,
             "peer_benchmarks": peer,
-            "reasons": reasons
+            "reasons": reasons,
+            "drift": drift,
+            "explanation": provider_explanation,
         }
+    finally:
+        conn.close()
+
+@app.get("/api/v1/providers/{provider_id}/drift")
+def get_provider_drift(provider_id: str):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("SELECT * FROM provider_drift WHERE provider_id = ?", (provider_id,))
+        row = cursor.fetchone()
+        if not row:
+            return {
+                "provider_id": provider_id,
+                "drift_score": 0.0,
+                "drift_level": "Low",
+                "claims_spike_ratio": 1.0,
+                "reimbursement_spike_ratio": 1.0,
+                "coding_shift_index": 0.0,
+                "historical_monthly_data": []
+            }
+        d = dict(row)
+        try:
+            d["historical_monthly_data"] = json.loads(d["historical_monthly_data"])
+        except Exception:
+            d["historical_monthly_data"] = []
+        d["explanation"] = parse_explanation(d.get("explanation_json"))
+        return d
     finally:
         conn.close()
 
@@ -473,10 +579,14 @@ def get_provider_report(provider_id: str):
         reasons = [row["reason"] for row in cursor.fetchall()]
         cursor.execute("""
             SELECT claim_id, provider_id, bene_id, claim_amount, risk_score,
-                   fraud_flag, suspicious_codes, explanation
+                   is_anomaly as fraud_flag,
+                   (explanation_1 || '; ' || explanation_2 || '; ' || explanation_3) as suspicious_codes,
+                   business_interpretation as explanation
             FROM claims WHERE provider_id = ? ORDER BY risk_score DESC, claim_amount DESC
         """, (provider_id,))
         claims = [dict(row) for row in cursor.fetchall()]
+        for claim in claims:
+            claim["explanation"] = parse_explanation(claim.get("explanation_json"))
 
         reimbursement = float(provider.get("total_reimbursement") or 0)
         risk_score = float(provider.get("risk_score") or 0)
@@ -494,8 +604,15 @@ def get_provider_report(provider_id: str):
         if risk_score >= 65: actions.append("Medical necessity validation")
         if risk_score >= 75: actions.append("Coding and documentation review")
         if risk_score >= 85 or float(scores.get("leie_score") or 0) > 0: actions.append("Payment suspension consideration")
-        narrative = (f"Provider {provider_id} has a composite risk score of {risk_score:.1f} and is classified as {provider.get('risk_level', 'Unknown')} Risk. Reimbursement is {ratios['reimbursement']:.2f}x the peer median and claim volume is {ratios['claims']:.2f}x the peer baseline. Isolation Forest scored {float(scores.get('isolation_score') or 0):.1f}, LOF scored {float(scores.get('lof_score') or 0):.1f}, and the Robust Z-Score Engine scored {float(scores.get('statistical_score') or 0):.1f}.")
-        return {"generated_at": datetime.now(timezone.utc).isoformat(), "provider": provider, "model_scores": scores, "peer_benchmarks": benchmarks, "benchmark_rows": benchmark_rows, "financial_exposure": {"average_claim_value": reimbursement / max(values["Total Claims"], 1), "potential_leakage": leakage}, "claims": claims, "reasons": reasons, "narrative": narrative, "recommendations": actions}
+        narrative = (
+            f"Provider {provider_id} is in the {provider.get('risk_level', 'Unknown')} risk band with a composite risk score of {risk_score:.1f}/100. "
+            f"Total reimbursement is {ratios['reimbursement']:.2f}x the comparable median, and claim volume is {ratios['claims']:.2f}x the peer baseline. "
+            f"The current review indicates materially elevated billing and a recent increase in payment activity compared with similar providers."
+        )
+        cursor.execute("SELECT explanation_json FROM provider_explanations WHERE provider_id = ?", (provider_id,))
+        provider_explanation_row = cursor.fetchone()
+        provider_explanation = parse_explanation(provider_explanation_row["explanation_json"]) if provider_explanation_row else None
+        return {"generated_at": datetime.now(timezone.utc).isoformat(), "provider": provider, "model_scores": scores, "peer_benchmarks": benchmarks, "benchmark_rows": benchmark_rows, "financial_exposure": {"average_claim_value": reimbursement / max(values["Total Claims"], 1), "potential_leakage": leakage}, "claims": claims, "reasons": reasons, "narrative": narrative, "recommendations": actions, "explanation": provider_explanation}
     finally:
         conn.close()
 
@@ -600,6 +717,8 @@ def list_claims(
     search: Optional[str] = None,
     provider_id: Optional[str] = None,
     fraud_flag: Optional[int] = None,
+    is_anomaly: Optional[int] = None,
+    risk_level: Optional[str] = None,
     sort_by: str = "risk_score",
     sort_order: str = "desc"
 ):
@@ -615,9 +734,21 @@ def list_claims(
         if provider_id:
             conditions.append("provider_id = ?")
             params.append(provider_id)
-        if fraud_flag is not None:
-            conditions.append("fraud_flag = ?")
+        if is_anomaly is not None:
+            conditions.append("is_anomaly = ?")
+            params.append(is_anomaly)
+        elif fraud_flag is not None:
+            conditions.append("is_anomaly = ?")
             params.append(fraud_flag)
+        if risk_level:
+            if risk_level == "Critical":
+                conditions.append("risk_score >= 85")
+            elif risk_level == "High":
+                conditions.append("risk_score >= 65 AND risk_score < 85")
+            elif risk_level == "Medium":
+                conditions.append("risk_score >= 35 AND risk_score < 65")
+            elif risk_level == "Low":
+                conditions.append("risk_score < 35")
             
         where_clause = " WHERE " + " AND ".join(conditions) if conditions else ""
         
@@ -639,13 +770,20 @@ def list_claims(
         """
         cursor.execute(query, params + [page_size, offset])
         rows = cursor.fetchall()
+        claim_amount_rows = cursor.execute("SELECT claim_type, claim_amount FROM claims WHERE claim_amount IS NOT NULL").fetchall()
+        claim_amounts = {}
+        for claim_type, amount in claim_amount_rows:
+            claim_amounts.setdefault(claim_type or "Unknown", []).append(float(amount or 0))
         
         return {
             "page": page,
             "page_size": page_size,
             "total_records": total_records,
             "total_pages": (total_records + page_size - 1) // page_size,
-            "data": [dict(row) for row in rows]
+            "data": [
+                self_explain_claim(dict(row), cursor, claim_amounts)
+                for row in rows
+            ]
         }
     finally:
         conn.close()
@@ -765,7 +903,7 @@ def get_model_performance():
 
 # ==================== RAG INVESTIGATION ASSISTANT ====================
 
-@app.post("/api/v1/ai-assistant/query")
+@app.post("/api/v1/ai-assistant/query-legacy")
 def query_ai_assistant(payload: AIQueryRequest):
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -859,64 +997,123 @@ Assigned Investigator: {p.get('assigned_investigator', 'Unassigned')}
         if "why" in q_lower or "reason" in q_lower or "flag" in q_lower or "suspicious" in q_lower:
             reasons_bullet = "\n".join([f"- {r}" for r in reasons])
             response_text = (
-                f"### Payment Integrity Case Summary for Provider **{p_id}**\n\n"
-                f"Provider **{p_id}** is flagged in the **{p['risk_level']} Risk** category with a composite risk score of **{p['risk_score']:.1f}/100**.\n\n"
-                f"#### Core Billing Anomalies and Risk Indicators:\n"
+                f"### Why this provider was flagged\n\n"
+                f"Provider **{p_id}** is in the **{p['risk_level']} risk** band with a composite risk score of **{p['risk_score']:.1f}/100**.\n\n"
+                f"#### Key evidence used in this review:\n"
                 f"{reasons_bullet}\n\n"
-                f"#### Algorithmic Risk Signature Breakdown:\n"
-                f"| Risk Signal Layer | Score (0-100) | Interpretation / Description |\n"
-                f"| :--- | :---: | :--- |\n"
-                f"| **Supervised Probability (CatBoost)** | {s.get('catboost_score', 0.0):.1f}% | Matches billing characteristics of past labeled fraud cases. |\n"
-                f"| **Isolation Forest Score** | {s.get('isolation_score', 0.0):.1f}% | Multi-dimensional outlier detection indicator. |\n"
-                f"| **Local Outlier Factor (LOF)** | {s.get('lof_score', 0.0):.1f}% | Peer group local density outlier indicator. |\n"
-                f"| **Statistical Deviation Z-Score** | {s.get('statistical_score', 0.0):.1f}% | Aggregate outlier rating across financial indices. |\n"
-                f"| **Peer Group Benchmark Variance** | {s.get('peer_score', 0.0):.1f}% | Out-of-bounds billing compared to state specialty medians. |\n"
-                f"| **LEIE Exclusion Screening** | {s.get('leie_score', 0.0):.1f}% | Match score against OIG list of excluded entities. |\n\n"
-                f"#### Investigator Recommendation:\n"
-                f"- Request itemized claims records for beneficiaries showing high claim frequency.\n"
-                f"- Check if diagnoses/procedure combinations match billing integrity rules."
+                f"#### What the investigation shows:\n"
+                f"- Billing is materially above similar providers in the peer group.\n"
+                f"- Recent payment levels have risen above the normal pattern for this provider.\n"
+                f"- The review found multiple indicators that together increase the risk of unnecessary or unsupported payment.\n\n"
+                f"#### Recommended action:\n"
+                f"- Review submitted claims and supporting documentation for the highest-value bills first.\n"
+                f"- Check whether the services, coding, and payment amounts are consistent with the patient record and peer benchmarks."
             )
         elif "peer" in q_lower or "benchmark" in q_lower or "compare" in q_lower or "median" in q_lower:
             response_text = (
-                f"### Specialty Peer Comparison: Provider **{p_id}**\n\n"
-                f"The provider operates as **{p.get('provider_type', 'Specialty')}** in **State {p.get('primary_state', 'N/A')}**.\n\n"
-                f"#### Benchmark Comparison Matrix:\n"
-                f"| Billing Metric | Provider Total | Peer Group Median | Ratio vs. Peer Median | National Percentile |\n"
-                f"| :--- | :---: | :---: | :---: | :---: |\n"
-                f"| **Total Reimbursement** | ${p.get('total_reimbursement', 0.0):,.2f} | ${p.get('total_reimbursement', 0.0) / max(0.1, b.get('reimbursement_ratio', 1.0)):,.2f} | **{b.get('reimbursement_ratio', 1.0):.2f}x** | {b.get('reimbursement_percentile', 50.0):.1f}th |\n"
-                f"| **Claims Count** | {p.get('total_claims', 0)} | {int(p.get('total_claims', 0) / max(0.1, b.get('claims_ratio', 1.0)))} | **{b.get('claims_ratio', 1.0):.2f}x** | {b.get('claims_percentile', 50.0):.1f}th |\n"
-                f"| **Patients Served** | {p.get('total_beneficiaries', 0)} | {int(p.get('total_beneficiaries', 0) / max(0.1, b.get('beneficiary_ratio', 1.0)))} | **{b.get('beneficiary_ratio', 1.0):.2f}x** | {b.get('beneficiary_percentile', 50.0):.1f}th |\n\n"
-                f"#### Peer Analysis Summary:\n"
-                f"- Reimbursement is **{b.get('reimbursement_ratio', 1.0):.2f}x** the state specialty median. This represents a significant financial variance.\n"
-                f"- The provider serves **{b.get('beneficiary_ratio', 1.0):.2f}x** more unique beneficiaries, meaning billing deviations are driven both by patient volume and high charges per patient."
+                f"### Peer Comparison: Provider **{p_id}**\n\n"
+                f"The provider operates in **State {p.get('primary_state', 'N/A')}** and falls within the **{p.get('provider_type', 'Specialty')}** category.\n\n"
+                f"| Review Metric | Provider Value | Comparable Median | Difference |\n"
+                f"| :--- | :---: | :---: | :---: |\n"
+                f"| **Total reimbursement** | ${p.get('total_reimbursement', 0.0):,.2f} | ${p.get('total_reimbursement', 0.0) / max(0.1, b.get('reimbursement_ratio', 1.0)):,.2f} | **{b.get('reimbursement_ratio', 1.0):.2f}x** |\n"
+                f"| **Claims volume** | {p.get('total_claims', 0)} | {int(p.get('total_claims', 0) / max(0.1, b.get('claims_ratio', 1.0)))} | **{b.get('claims_ratio', 1.0):.2f}x** |\n"
+                f"| **Beneficiaries served** | {p.get('total_beneficiaries', 0)} | {int(p.get('total_beneficiaries', 0) / max(0.1, b.get('beneficiary_ratio', 1.0)))} | **{b.get('beneficiary_ratio', 1.0):.2f}x** |\n\n"
+                f"#### Peer summary:\n"
+                f"- Reimbursement is **{b.get('reimbursement_ratio', 1.0):.2f}x** the normal level for comparable providers.\n"
+                f"- The provider's claim count and billing volume are also above the expected range, which increases the review priority."
             )
-        elif "model" in q_lower or "algorithm" in q_lower or "ml" in q_lower:
+        elif "model" in q_lower or "algorithm" in q_lower or "risk score" in q_lower or "score" in q_lower:
             response_text = (
-                f"### Layered Machine Learning Risk Output for **{p_id}**\n\n"
-                f"The Risk Fusion Engine integrates five ML models to classify cases:\n\n"
-                f"- **CatBoost Supervised Classifier ({s.get('catboost_score', 0.0):.1f}/100):** This is a gradient-boosted decision tree classifier trained on ground-truth labeled audit reviews. The high score indicates that the provider's statistical features closely match patterns associated with verified historical fraud.\n"
-                f"- **Isolation Forest ({s.get('isolation_score', 0.0):.1f}/100):** An unsupervised tree model that isolates outliers by randomly partitioning features. A high score suggests the provider's billing structure is highly atypical.\n"
-                f"- **Local Outlier Factor (LOF) ({s.get('lof_score', 0.0):.1f}/100):** Evaluates local density compared to neighboring providers, highlighting providers that are isolated from their nearest peer group.\n"
-                f"- **Robust Z-Score ({s.get('statistical_score', 0.0):.1f}/100):** Aggregate outlier rating across financial indices using median absolute deviations.\n"
-                f"- **Peer Benchmarking ({s.get('peer_score', 0.0):.1f}/100):** Out-of-bounds billing compared to state specialty medians."
+                f"### Review Summary for **{p_id}**\n\n"
+                f"This provider's risk rating is driven by multiple business signals, not by any single metric.\n\n"
+                f"- **Historical billing pattern:** This provider has materially higher payments than comparable providers.\n"
+                f"- **Claim volume:** The number of claims submitted is above the expected range for similar providers.\n"
+                f"- **Recent billing change:** Recent billing activity shows a noticeable increase compared with earlier months.\n"
+                f"- **Peer comparison:** The provider sits in an elevated range relative to the local peer group.\n"
+                f"- **Exclusion check:** The review includes a check for any exclusion screening match."
             )
         else:
             response_text = (
                 f"### AI Fraud Investigation Copilot\n\n"
-                f"Hello, I am your Fraud Investigation Copilot. I have retrieved the full payment integrity audit data for **Provider {p_id}**.\n\n"
-                f"Here is a summary of the loaded context:\n"
-                f"- **Composite Risk Score:** {p['risk_score']:.1f} / 100 ({p['risk_level']} Risk)\n"
-                f"- **Billing Potential Leakage:** ${p['total_reimbursement']:,.2f}\n"
-                f"- **Peer Benchmark Ratio:** {b.get('reimbursement_ratio', 1.0):.2f}x median\n"
-                f"- **Claims Count:** {p['total_claims']} claims across {p['total_beneficiaries']} beneficiaries\n"
-                f"- **Audit Status:** {p.get('investigation_status', 'New')}\n"
-                f"- **Assigned Investigator:** {p.get('assigned_investigator', 'Unassigned')}\n\n"
-                f"Please ask a specific fraud investigation query such as:\n"
+                f"I have retrieved the audit evidence for **Provider {p_id}**.\n\n"
+                f"Here is the business-facing summary:\n"
+                f"- **Risk score:** {p['risk_score']:.1f} / 100 ({p['risk_level']} risk)\n"
+                f"- **Potential financial exposure:** ${p['total_reimbursement']:,.2f}\n"
+                f"- **Peer comparison:** {b.get('reimbursement_ratio', 1.0):.2f}x the comparable median\n"
+                f"- **Claims reviewed:** {p['total_claims']} claims across {p['total_beneficiaries']} beneficiaries\n"
+                f"- **Investigation status:** {p.get('investigation_status', 'New')}\n"
+                f"- **Assigned investigator:** {p.get('assigned_investigator', 'Unassigned')}\n\n"
+                f"Ask a targeted question such as:\n"
                 f"1. *Why was this provider flagged?*\n"
-                f"2. *Show peer benchmark comparison.*\n"
-                f"3. *Explain provider risk score.*"
+                f"2. *How does this provider compare with peers?*\n"
+                f"3. *What should the investigator review next?*"
             )
             
         return {"response": response_text}
+    finally:
+        conn.close()
+
+@app.post("/api/v1/ai-assistant/query")
+def query_grounded_copilot(payload: AIQueryRequest):
+    """Return a business-facing investigation summary built only from stored evidence."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            SELECT p.*, i.status as investigation_status, i.notes as investigation_notes,
+                   i.assigned_investigator
+            FROM providers p LEFT JOIN investigations i ON p.provider_id = i.provider_id
+            WHERE p.provider_id = ?
+        """, (payload.provider_id,))
+        provider_row = cursor.fetchone()
+        if not provider_row:
+            raise HTTPException(status_code=404, detail="Provider not found")
+        provider = dict(provider_row)
+
+        cursor.execute("SELECT * FROM model_scores WHERE provider_id = ?", (payload.provider_id,))
+        scores = dict(cursor.fetchone() or {})
+        cursor.execute("SELECT * FROM peer_benchmarks WHERE provider_id = ?", (payload.provider_id,))
+        benchmarks = dict(cursor.fetchone() or {})
+        cursor.execute("SELECT reason FROM explanations WHERE provider_id = ?", (payload.provider_id,))
+        reasons = [row["reason"] for row in cursor.fetchall()]
+
+        cursor.execute("SELECT * FROM provider_drift WHERE provider_id = ?", (payload.provider_id,))
+        drift_row = cursor.fetchone()
+        drift = dict(drift_row) if drift_row else {}
+        if drift.get("historical_monthly_data"):
+            try:
+                drift["historical_monthly_data"] = json.loads(drift["historical_monthly_data"])
+            except (TypeError, json.JSONDecodeError):
+                drift["historical_monthly_data"] = []
+
+        cursor.execute("SELECT explanation_json FROM provider_explanations WHERE provider_id = ?", (payload.provider_id,))
+        explanation_row = cursor.fetchone()
+        summary = parse_explanation(explanation_row["explanation_json"]) if explanation_row else None
+        if summary is None:
+            summary = build_provider_explanation(provider, scores, benchmarks, drift, reasons)
+
+        cursor.execute("""
+            SELECT claim_id, provider_id, risk_score, risk_category, is_anomaly,
+                   claim_amount, business_interpretation, explanation_json
+            FROM claims WHERE provider_id = ? ORDER BY risk_score DESC LIMIT 10
+        """, (payload.provider_id,))
+        claim_evidence = []
+        for row in cursor.fetchall():
+            claim = dict(row)
+            claim["explanation"] = parse_explanation(claim.pop("explanation_json", None))
+            claim_evidence.append(claim)
+
+        return {
+            "response": summary["ai_summary"],
+            "investigation_summary": summary,
+            "grounded_evidence": {
+                "provider_id": payload.provider_id,
+                "provider": provider,
+                "peer_benchmarks": benchmarks,
+                "temporal_drift": drift,
+                "claims": claim_evidence,
+                "investigator_query": payload.query,
+            },
+        }
     finally:
         conn.close()
