@@ -13,7 +13,7 @@ from typing import List, Optional
 import numpy as np
 import google.generativeai as genai
 from app.pipeline import run_risk_pipeline, pipeline_status
-from app.explanation_service import build_claim_explanation, build_provider_explanation
+from app.explanation_service import build_claim_explanation, build_provider_explanation, money
 
 # Setup logger
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
@@ -1103,8 +1103,193 @@ def query_grounded_copilot(payload: AIQueryRequest):
             claim["explanation"] = parse_explanation(claim.pop("explanation_json", None))
             claim_evidence.append(claim)
 
+        # Query routing and query-aware prompt generation
+        api_key = os.environ.get("GEMINI_API_KEY")
+        user_query = payload.query
+        q_lower = user_query.lower()
+        
+        context_doc = f"""
+Provider Case Profile:
+- Provider ID: {payload.provider_id}
+- Specialty Class: {provider.get('provider_type', 'General')}
+- Operating State: State {provider.get('primary_state', 'Unknown')}
+- Total Insurance Claims: {provider.get('total_claims', 0)}
+- Inpatient Claims: {provider.get('inpatient_claims', 0)}
+- Outpatient Claims: {provider.get('outpatient_claims', 0)}
+- Inpatient Billing Ratio: {provider.get('inpatient_ratio', 0.0):.2f}
+- Covered Billing Amount (Potential Leakage): ${provider.get('total_reimbursement', 0.0):,.2f}
+- Average Reimbursement Per Claim: ${provider.get('mean_reimbursement', 0.0):,.2f}
+- Ground Truth Labeled Fraud: {"Yes" if provider.get('PotentialFraud') == 1 else "No"}
+- Composite Risk Score: {provider.get('risk_score', 0.0):.1f}/100
+- Risk Classification: {provider.get('risk_level', 'Unknown')}
+
+Layered Model Score Breakdown:
+- CatBoost Classifier (Supervised Probability): {scores.get('catboost_score', 0.0):.1f}%
+- Isolation Forest Outlier Score: {scores.get('isolation_score', 0.0):.1f}%
+- PyTorch Autoencoder Reconstruction Loss Score: {scores.get('autoencoder_score', 0.0):.1f}%
+- Local Outlier Factor Score: {scores.get('lof_score', 0.0):.1f}%
+- One-Class SVM Outlier Score: {scores.get('ocsvm_score', 0.0):.1f}%
+- Combined Anomaly Score: {scores.get('ml_score', 0.0):.1f}%
+- Statistical Deviation Z-Score Rating: {scores.get('statistical_score', 0.0):.1f}%
+- Peer Group Benchmarking Score: {scores.get('peer_score', 0.0):.1f}%
+- LEIE Exclusion Score: {scores.get('leie_score', 0.0):.1f}%
+
+Peer Comparison Metrics (Provider value compared to peer group median):
+- Total Reimbursement Ratio: {benchmarks.get('reimbursement_ratio', 1.0):.2f}x median (National Percentile: {benchmarks.get('reimbursement_percentile', 50.0):.1f}th)
+- Claims Count Ratio: {benchmarks.get('claims_ratio', 1.0):.2f}x median (National Percentile: {benchmarks.get('claims_percentile', 50.0):.1f}th)
+- Patient Volume Ratio: {benchmarks.get('beneficiary_ratio', 1.0):.2f}x median (National Percentile: {benchmarks.get('beneficiary_percentile', 50.0):.1f}th)
+
+Automated Fraud Anomalies & Billing Indicators:
+{chr(10).join([f"- {r}" for r in reasons]) if reasons else "- No specific anomalies flags."}
+
+Current Investigation Status: {provider.get('investigation_status', 'New')}
+Auditor/Investigator Notes: {provider.get('investigation_notes', 'No notes entered.')}
+Assigned Investigator: {provider.get('assigned_investigator', 'Unassigned')}
+"""
+
+        response_text = ""
+        intent_detected = "General Summary"
+        
+        # Route query into intent-specific handlers
+        if any(w in q_lower for w in ["why", "reason", "flag", "suspicious", "anomaly", "anomalous"]):
+            intent_detected = "Flag Reasoning"
+        elif any(w in q_lower for w in ["compare", "peer", "benchmark", "median", "percentile", "relation"]):
+            intent_detected = "Peer Comparison"
+        elif any(w in q_lower for w in ["financial", "impact", "leakage", "reimbursement", "exposure", "cost", "money", "loss", "liability"]):
+            intent_detected = "Financial Impact"
+        elif any(w in q_lower for w in ["evidence", "support", "model", "metric", "algorithm", "score", "indicator", "run", "signal", "catboost", "autoencoder", "isolation", "lof", "svm", "z-score", "factor"]):
+            intent_detected = "Evidence Summary"
+        elif any(w in q_lower for w in ["next", "action", "recommend", "auditor", "do next", "step", "plan", "review"]):
+            intent_detected = "Recommended Actions"
+            
+        if api_key:
+            try:
+                genai.configure(api_key=api_key)
+                system_instruction = (
+                    "You are an expert Payment Integrity Specialist and Healthcare Fraud Investigator. "
+                    "Synthesize billing claims evidence, anomaly model risk signatures, and peer benchmark comparison metrics. "
+                    "Provide a professional, objective, audit-grounded response. Format all output beautifully in GitHub-style Markdown "
+                    "using bolding, tables, bulleted lists, and clear headers to summarize findings. Highlight key payment integrity recommendations."
+                )
+                
+                intent_guidelines = ""
+                if intent_detected == "Flag Reasoning":
+                    intent_guidelines = "Focus primarily on explaining why the provider was flagged, referencing the anomaly flags, model score breakdown, and specific billing indicators."
+                elif intent_detected == "Peer Comparison":
+                    intent_guidelines = "Focus primarily on comparing the provider to peers, highlighting total reimbursement, claims ratio, and beneficiary ratios. Use a Markdown table for comparison."
+                elif intent_detected == "Financial Impact":
+                    intent_guidelines = "Focus primarily on the financial risk, exposure, total reimbursement amount, and estimated leakage/risk-weighted exposure."
+                elif intent_detected == "Evidence Summary":
+                    intent_guidelines = "Focus primarily on the supporting evidence, including the layered model scores, machine learning indicators, statistical deviations, and claims-level audits."
+                elif intent_detected == "Recommended Actions":
+                    intent_guidelines = "Focus primarily on recommended next steps and actionable auditing advice (e.g. medical necessity review, documentation audits, coding checks) tailored to this provider's risk level."
+                
+                prompt = (
+                    f"Using the following grounded provider context, answer this inquiry: '{user_query}'\n\n"
+                    f"[INSTRUCTIONS]\n{intent_guidelines}\n\n"
+                    f"[CONTEXT]\n{context_doc}"
+                )
+                
+                model = genai.GenerativeModel("gemini-1.5-flash", system_instruction=system_instruction)
+                response = model.generate_content(prompt)
+                response_text = response.text
+            except Exception as e:
+                logger.error(f"Gemini API invocation failed in query_grounded_copilot: {e}")
+
+        # Fallback local expert response generation if Gemini is not used or fails
+        if not response_text:
+            if intent_detected == "Flag Reasoning":
+                reasons_bullet = "\n".join([f"- {r}" for r in summary.get("why_flagged", [])])
+                suspicious_bullet = "\n".join([f"- {r}" for r in summary.get("why_suspicious", [])])
+                response_text = (
+                    f"### Flag Reasoning Report for Provider **{payload.provider_id}**\n\n"
+                    f"This provider is classified in the **{summary['risk_category']} risk** tier with a composite risk score of **{summary['risk_score']:.1f}/100**.\n\n"
+                    f"#### Key Risk Indicators & Anomalies:\n"
+                    f"{reasons_bullet}\n\n"
+                    f"#### Specific Billing Suspicions:\n"
+                    f"{suspicious_bullet}\n\n"
+                    f"#### Clinical Summary:\n"
+                    f"The combined risk score is driven by extreme deviations in billing volume and inpatient/outpatient configurations, triggering alerts across multiple anomaly models. This pattern represents a high probability of billing irregularities that require clinical validation."
+                )
+            elif intent_detected == "Peer Comparison":
+                comparison_bullet = "\n".join([f"- {r}" for r in summary.get("peer_comparison", [])])
+                behaviour_bullet = "\n".join([f"- {r}" for r in summary.get("billing_behaviour_summary", [])])
+                
+                reimb_ratio = benchmarks.get('reimbursement_ratio', 1.0)
+                claims_ratio = benchmarks.get('claims_ratio', 1.0)
+                bene_ratio = benchmarks.get('beneficiary_ratio', 1.0)
+                
+                reimb_prov = provider.get('total_reimbursement', 0.0)
+                reimb_median = reimb_prov / max(0.01, reimb_ratio)
+                
+                claims_prov = provider.get('total_claims', 0)
+                claims_median = claims_prov / max(0.01, claims_ratio)
+                
+                bene_prov = provider.get('total_beneficiaries', 0)
+                bene_median = bene_prov / max(0.01, bene_ratio)
+
+                response_text = (
+                    f"### Peer Group Comparison for Provider **{payload.provider_id}**\n\n"
+                    f"The provider operates as a **{provider.get('provider_type', 'Specialty Class')}** in **State {provider.get('primary_state', 'Unknown')}**.\n\n"
+                    f"| Metric / KPI | Provider Value | Peer Median | Peer Deviation |\n"
+                    f"| :--- | :---: | :---: | :---: |\n"
+                    f"| **Total Reimbursements** | ${reimb_prov:,.2f} | ${reimb_median:,.2f} | **{reimb_ratio:.1f}x median** ({benchmarks.get('reimbursement_percentile', 50.0):.1f}th percentile) |\n"
+                    f"| **Submitted Claims** | {claims_prov:,} | {int(claims_median):,} | **{claims_ratio:.1f}x median** ({benchmarks.get('claims_percentile', 50.0):.1f}th percentile) |\n"
+                    f"| **Beneficiaries Served** | {bene_prov:,} | {int(bene_median):,} | **{bene_ratio:.1f}x median** ({benchmarks.get('beneficiary_percentile', 50.0):.1f}th percentile) |\n\n"
+                    f"#### Benchmark Findings:\n"
+                    f"{comparison_bullet}\n"
+                    f"{behaviour_bullet}\n\n"
+                    f"#### Behavioral Drift Status:\n"
+                    f"Month-over-month analysis shows provider behavior level is evaluated as **{drift.get('drift_level', 'Low')}** risk with a temporal drift score of **{drift.get('drift_score', 0.0):.1f}%**."
+                )
+            elif intent_detected == "Financial Impact":
+                financial_bullet = "\n".join([f"- {r}" for r in summary.get("financial_impact", [])])
+                response_text = (
+                    f"### Financial Impact and Exposure Assessment: **{payload.provider_id}**\n\n"
+                    f"An evaluation of billing volumes indicates significant financial exposure associated with provider anomalous behaviors.\n\n"
+                    f"#### Key Financial Indicators:\n"
+                    f"{financial_bullet}\n\n"
+                    f"#### Fraud Leakage Exposure Analysis:\n"
+                    f"- **Total billing volume at risk:** ${provider.get('total_reimbursement', 0.0):,.2f}.\n"
+                    f"- **Risk-weighted exposure estimate:** ${provider.get('total_reimbursement', 0.0) * provider.get('risk_score', 0.0) / 100:,.2f}. This calculation scales the total reimbursement by the composite risk score ({provider.get('risk_score', 0.0):.1f}%) to prioritize audits by potential savings.\n\n"
+                    f"Recommended path is to audit high-value claims first to prevent further payment leakage."
+                )
+            elif intent_detected == "Evidence Summary":
+                response_text = (
+                    f"### Multi-Model Evidence Summary for **{payload.provider_id}**\n\n"
+                    f"The platform scored this case across 8 separate risk dimensions. The composite score of **{provider.get('risk_score', 0.0):.1f}/100** represents a weighted fusion of these models.\n\n"
+                    f"#### 1. Layered Model Scores:\n"
+                    f"- **Supervised Classifier (CatBoost):** {scores.get('catboost_score', 0.0):.1f}% risk score based on historical patterns.\n"
+                    f"- **Outlier Anomaly (Isolation Forest):** {scores.get('isolation_score', 0.0):.1f}% outlier rating.\n"
+                    f"- **Peer Deviation (LOF):** {scores.get('lof_score', 0.0):.1f}% local outlier factor score.\n"
+                    f"- **Statistical Deviation (Robust Z-Score):** {scores.get('statistical_score', 0.0):.1f}% z-score deviation.\n"
+                    f"- **Neural Reconstruction (PyTorch Autoencoder):** {scores.get('autoencoder_score', 0.0):.1f}% reconstruction loss score.\n"
+                    f"- **OIG LEIE Exclusion Match:** {scores.get('leie_score', 0.0):.1f}% match score.\n\n"
+                    f"#### 2. Specific Claim Audits:\n"
+                    f"The top claims submitted by this provider show high risk scores, including:"
+                )
+                for claim in claim_evidence[:3]:
+                    response_text += f"\n- **Claim {claim['claim_id']}:** {money(claim['claim_amount'])} ({claim['risk_category']} risk, Score: {claim['risk_score']:.1f}/100) — *'{claim['business_interpretation']}'*"
+            elif intent_detected == "Recommended Actions":
+                response_text = (
+                    f"### Actionable Audit Recommendations: Provider **{payload.provider_id}**\n\n"
+                    f"Based on the composite risk category (**{summary['risk_category']}**), the payment integrity team should initiate the following steps:\n\n"
+                    f"#### 1. Immediate Next Step:\n"
+                    f"- **{summary['recommended_action']}**\n\n"
+                    f"#### 2. Investigative Checklist:\n"
+                    f"- [ ] **Documentation Request**: Request clinical documentation and medical records for claims exceeding ${benchmarks.get('reimbursement_ratio', 1.0)*1000:,.0f} to verify necessity.\n"
+                    f"- [ ] **Coding Validation**: Check for code unbundling or upcoding on high-value outpatient bills.\n"
+                    f"- [ ] **Peer Verification**: Verify if services billed match peer patterns for primary specialty: **{provider.get('provider_type', 'General')}**.\n\n"
+                    f"#### 3. Investigation Audit Trail:\n"
+                    f"- **Status**: {provider.get('investigation_status', 'New')}\n"
+                    f"- **Assigned Investigator**: {provider.get('assigned_investigator', 'Unassigned')}\n"
+                    f"- **Notes**: {provider.get('investigation_notes', 'No clinical audit notes entered.')}"
+                )
+            else:
+                response_text = summary["ai_summary"]
+
         return {
-            "response": summary["ai_summary"],
+            "response": response_text,
             "investigation_summary": summary,
             "grounded_evidence": {
                 "provider_id": payload.provider_id,
