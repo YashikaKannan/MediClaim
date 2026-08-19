@@ -13,6 +13,8 @@ const Header: React.FC = () => {
       // Redirect to the provider investigation page if the search input matches a potential provider ID format
       const query = search.trim().toUpperCase();
       if (query.startsWith('PRV')) {
+        localStorage.setItem('mediclaim_selected_provider', query);
+        window.dispatchEvent(new Event('mediclaim-provider-selected'));
         navigate(`/provider/${query}`);
       } else {
         navigate(`/queue?search=${query}`);

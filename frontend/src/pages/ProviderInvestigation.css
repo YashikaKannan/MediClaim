@@ -212,6 +212,7 @@
 .progress-fg.blue { background: var(--accent-blue); }
 .progress-fg.orange { background: var(--risk-medium); }
 .progress-fg.teal { background: var(--accent-teal); }
+.progress-fg.red { background: var(--risk-high); }
 
 /* Peer Group Benchmarking */
 .peer-content {

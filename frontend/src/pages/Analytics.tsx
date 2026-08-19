@@ -134,12 +134,12 @@ const Analytics: React.FC = () => {
             </thead>
             <tbody>
               {metrics.map((metric, i) => (
-                <tr key={i} className={metric.model === 'Combined Risk Engine' ? 'highlight-row' : ''}>
+                <tr key={i} className={metric.model === 'Combined Risk Fusion Engine' ? 'highlight-row' : ''}>
                   <td>
                     <strong>{metric.model}</strong>
                   </td>
                   <td>
-                    <span className={`type-tag type-${metric.type.toLowerCase()}`}>
+                    <span className={`type-tag type-${metric.type.replace(/\s+/g, '').toLowerCase()}`}>
                       {metric.type}
                     </span>
                   </td>
@@ -161,7 +161,7 @@ const Analytics: React.FC = () => {
         <div className="evaluation-note">
           <Info size={14} />
           <p>
-            <strong>Key Insight:</strong> The <em>Combined Risk Engine</em> blends supervised historical probability with unsupervised pattern outlier markers, achieving <strong>100% Precision@100</strong>. This guarantees that the top 100 highest-scored cases reviewed by investigators are verified fraudulent claims.
+            <strong>Key Insight:</strong> The <em>Combined Risk Fusion Engine</em> blends supervised historical probability (CatBoost) with unsupervised outlier models (Isolation Forest, LOF), statistical benchmarks (Robust Z-Score, Peer Benchmarking), and deterministic rule screens (LEIE Exclusion Screening), achieving <strong>100% Precision@100</strong>. This guarantees that the top 100 highest-scored cases reviewed by investigators are verified fraudulent claims.
           </p>
         </div>
       </div>

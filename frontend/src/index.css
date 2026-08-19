@@ -5,24 +5,24 @@
   --font-heading: 'Outfit', sans-serif;
   --font-body: 'Plus Jakarta Sans', sans-serif;
   
-  /* Color Palette (Deep Space Theme) */
-  --bg-primary: #0a0e1a;
-  --bg-secondary: #11182c;
-  --bg-tertiary: #1b253d;
-  --bg-card: rgba(17, 24, 44, 0.7);
-  --bg-glass: rgba(17, 24, 44, 0.45);
+  /* Color Palette (White and Light Blue Theme) */
+  --bg-primary: #f4f9fd;
+  --bg-secondary: #e8f3fb;
+  --bg-tertiary: #d9ebf7;
+  --bg-card: rgba(255, 255, 255, 0.94);
+  --bg-glass: rgba(255, 255, 255, 0.78);
   
-  --border-color: rgba(255, 255, 255, 0.08);
-  --border-glow: rgba(59, 130, 246, 0.15);
+  --border-color: #cfe2f0;
+  --border-glow: rgba(37, 143, 207, 0.18);
   
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
+  --text-primary: #16324a;
+  --text-secondary: #48677f;
+  --text-muted: #6e8ba0;
   
   /* Accent Colors */
-  --accent-blue: #3b82f6;
-  --accent-purple: #8b5cf6;
-  --accent-teal: #14b8a6;
+  --accent-blue: #258fcf;
+  --accent-purple: #5a8fc2;
+  --accent-teal: #159f9a;
   
   /* Risk Severity Colors */
   --risk-low: #10b981;
@@ -37,12 +37,12 @@
   --status-audit: #ef4444;
   
   /* Gradients */
-  --gradient-primary: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
-  --gradient-success: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  --gradient-primary: linear-gradient(135deg, #258fcf 0%, #69b9e5 100%);
+  --gradient-success: linear-gradient(135deg, #0b8f82 0%, #159f9a 100%);
   --gradient-warning: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
   --gradient-danger: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
-  --gradient-dark: linear-gradient(180deg, #11182c 0%, #0a0e1a 100%);
-  --gradient-glow: radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.15) 0%, transparent 80%);
+  --gradient-dark: linear-gradient(180deg, #ffffff 0%, #eef7fc 100%);
+  --gradient-glow: radial-gradient(circle at 50% 50%, rgba(37, 143, 207, 0.12) 0%, transparent 80%);
   
   /* Transitions */
   --transition-fast: 0.15s ease;
@@ -50,10 +50,10 @@
   --transition-slow: 0.5s ease;
   
   /* Box Shadow */
-  --shadow-sm: 0 2px 8px -2px rgba(0, 0, 0, 0.5);
-  --shadow-md: 0 4px 20px -4px rgba(0, 0, 0, 0.7);
-  --shadow-lg: 0 10px 30px -10px rgba(0, 0, 0, 0.9);
-  --shadow-glow: 0 0 20px 2px rgba(59, 130, 246, 0.15);
+  --shadow-sm: 0 2px 8px -2px rgba(42, 91, 121, 0.12);
+  --shadow-md: 0 4px 20px -4px rgba(42, 91, 121, 0.16);
+  --shadow-lg: 0 10px 30px -10px rgba(42, 91, 121, 0.2);
+  --shadow-glow: 0 0 20px 2px rgba(37, 143, 207, 0.12);
 }
 
 /* --- RESET & BASIC STYLES --- */
@@ -65,8 +65,8 @@
 
 body {
   background-color: var(--bg-primary);
-  background-image: radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.08) 0px, transparent 50%),
-                    radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.05) 0px, transparent 50%);
+  background-image: radial-gradient(at 0% 0%, rgba(105, 185, 229, 0.18) 0px, transparent 50%),
+                    radial-gradient(at 100% 100%, rgba(37, 143, 207, 0.08) 0px, transparent 50%);
   color: var(--text-primary);
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
@@ -204,7 +204,7 @@ input:focus, select:focus, textarea:focus {
 }
 
 .btn-secondary:hover {
-  background: #253354;
+  background: #c7e2f2;
   border-color: var(--text-muted);
 }
 
@@ -293,8 +293,8 @@ table {
 }
 
 th {
-  background: rgba(17, 24, 44, 0.9);
-  color: var(--text-secondary);
+  background: #dceef8;
+  color: var(--text-primary);
   font-family: var(--font-heading);
   font-weight: 600;
   padding: 1rem 1.25rem;

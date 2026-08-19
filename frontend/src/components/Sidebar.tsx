@@ -38,7 +38,7 @@ const Sidebar: React.FC = () => {
           <span>Investigation Queue</span>
         </NavLink>
         
-        <NavLink to="/analytics" className={({ isActive }) => `menu-item ${isActive ? 'active' : ''}`}>
+        <NavLink to="/reports" className={({ isActive }) => `menu-item ${isActive ? 'active' : ''}`}>
           <BarChart3 className="menu-icon" />
           <span>Analytics & Reports</span>
         </NavLink>

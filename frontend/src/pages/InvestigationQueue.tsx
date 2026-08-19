@@ -26,6 +26,8 @@ interface ProviderItem {
   primary_state: number;
   provider_type: string;
   investigation_status: string;
+  assigned_investigator?: string;
+  priority_score?: number;
 }
 
 const InvestigationQueue: React.FC = () => {
@@ -40,7 +42,7 @@ const InvestigationQueue: React.FC = () => {
   const [stateFilter, setStateFilter] = useState<string>('');
   
   // Sorting
-  const [sortBy, setSortBy] = useState('risk_score');
+  const [sortBy, setSortBy] = useState('priority_score');
   const [sortOrder, setSortOrder] = useState('desc');
   
   // Pagination
@@ -185,6 +187,9 @@ const InvestigationQueue: React.FC = () => {
                     </th>
                     <th>Beneficiaries</th>
                     <th>Inpatient Ratio</th>
+                    <th onClick={() => toggleSort('priority_score')} className="sortable-th">
+                      Priority Score <ArrowUpDown size={12} />
+                    </th>
                     <th onClick={() => toggleSort('risk_score')} className="sortable-th">
                       Risk Score <ArrowUpDown size={12} />
                     </th>
@@ -204,19 +209,35 @@ const InvestigationQueue: React.FC = () => {
                       <td>{p.total_beneficiaries}</td>
                       <td>{(p.inpatient_ratio * 100).toFixed(1)}%</td>
                       <td>
+                        <span className="priority-val-lbl">
+                          {p.priority_score ? p.priority_score.toLocaleString(undefined, {maximumFractionDigits: 0}) : '0'}
+                        </span>
+                      </td>
+                      <td>
                         <span className={`badge badge-${p.risk_level.toLowerCase()}`}>
                           {p.risk_score.toFixed(1)}
                         </span>
                       </td>
                       <td>
-                        <span className={`badge status-${(p.investigation_status || 'New').toLowerCase().replace(' ', '-')}`}>
-                          {p.investigation_status || 'New'}
-                        </span>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                          <span className={`badge status-${(p.investigation_status || 'New').toLowerCase().replace(' ', '-')}`}>
+                            {p.investigation_status || 'New'}
+                          </span>
+                          {p.assigned_investigator && p.assigned_investigator !== 'Unassigned' && (
+                            <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+                              Assigned: {p.assigned_investigator}
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td>
                         <button 
                           className="btn btn-secondary btn-sm table-action-btn"
-                          onClick={() => navigate(`/provider/${p.provider_id}`)}
+                          onClick={() => {
+                            localStorage.setItem('mediclaim_selected_provider', p.provider_id);
+                            window.dispatchEvent(new Event('mediclaim-provider-selected'));
+                            navigate(`/provider/${p.provider_id}`);
+                          }}
                         >
                           <Eye size={14} />
                           Review

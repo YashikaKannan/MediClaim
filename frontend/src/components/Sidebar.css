@@ -1,6 +1,6 @@
 .sidebar {
   width: 260px;
-  background: #090d16;
+  background: #ffffff;
   border-right: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
@@ -15,7 +15,7 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .brand-icon {
@@ -62,16 +62,16 @@
 }
 
 .menu-item:hover {
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--bg-secondary);
   color: var(--text-primary);
   padding-left: 1.15rem;
 }
 
 .menu-item.active {
-  background: rgba(59, 130, 246, 0.08);
+  background: #e5f3fb;
   color: var(--text-primary);
   border-left-color: var(--accent-blue);
-  box-shadow: inset 10px 0 20px -10px rgba(59, 130, 246, 0.15);
+  box-shadow: inset 10px 0 20px -10px rgba(37, 143, 207, 0.15);
 }
 
 .menu-icon {
@@ -92,8 +92,8 @@
 
 .sidebar-footer {
   padding: 1.25rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.03);
-  background: rgba(0, 0, 0, 0.15);
+  border-top: 1px solid var(--border-color);
+  background: #f7fbfe;
 }
 
 .status-panel {
@@ -106,7 +106,7 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  background: rgba(255, 255, 255, 0.02);
+  background: #ffffff;
   border: 1px solid var(--border-color);
   padding: 0.65rem 0.85rem;
   border-radius: 8px;

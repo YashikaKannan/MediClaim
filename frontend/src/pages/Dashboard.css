@@ -52,11 +52,17 @@
 /* KPI Cards */
 .kpi-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1.5rem;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 1rem;
 }
 
-@media (max-width: 1200px) {
+@media (max-width: 1600px) {
+  .kpi-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 1024px) {
   .kpi-grid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -107,6 +113,18 @@
   background: rgba(139, 92, 246, 0.1);
   color: var(--accent-purple);
   border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+.kpi-icon-container.orange {
+  background: rgba(249, 115, 22, 0.1);
+  color: var(--risk-medium);
+  border: 1px solid rgba(249, 115, 22, 0.2);
+}
+
+.kpi-icon-container.green {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--risk-low);
+  border: 1px solid rgba(16, 185, 129, 0.2);
 }
 
 .kpi-content {

@@ -11,34 +11,101 @@ import './Settings.css';
 
 const Settings: React.FC = () => {
   const [apiUrl, setApiUrlState] = useState(getApiUrl());
-  const [mlWeight, setMlWeight] = useState(40);
-  const [statWeight, setStatWeight] = useState(30);
-  const [peerWeight, setPeerWeight] = useState(30);
+  const [catboostWeight, setCatboostWeight] = useState(25);
+  const [iforestWeight, setIforestWeight] = useState(20);
+  const [lofWeight, setLofWeight] = useState(15);
+  const [robustZWeight, setRobustZWeight] = useState(15);
+  const [peerBenchmarkWeight, setPeerBenchmarkWeight] = useState(15);
+  const [leieWeight, setLeieWeight] = useState(10);
   const [zCutoff, setZCutoff] = useState(3.0);
   const [highRiskLimit, setHighRiskLimit] = useState(65);
   const [critRiskLimit, setCritRiskLimit] = useState(85);
   const [savedMsg, setSavedMsg] = useState('');
+  const [loading, setLoading] = useState(true);
 
-  const handleSaveSettings = (e: React.FormEvent) => {
+  React.useEffect(() => {
+    fetchSettings();
+  }, []);
+
+  const fetchSettings = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch(`${getApiUrl()}/api/v1/settings`);
+      if (res.ok) {
+        const data = await res.json();
+        setApiUrlState(data.api_url || getApiUrl());
+        setCatboostWeight(Math.round((data.catboost_weight || 0.25) * 100));
+        setIforestWeight(Math.round((data.iforest_weight || 0.20) * 100));
+        setLofWeight(Math.round((data.lof_weight || 0.15) * 100));
+        setRobustZWeight(Math.round((data.robust_z_weight || 0.15) * 100));
+        setPeerBenchmarkWeight(Math.round((data.peer_benchmark_weight || 0.15) * 100));
+        setLeieWeight(Math.round((data.leie_weight || 0.10) * 100));
+        setZCutoff(data.z_cutoff);
+        setHighRiskLimit(data.high_risk_limit);
+        setCritRiskLimit(data.crit_risk_limit);
+      }
+    } catch (e) {
+      console.error("Error loading settings from DB", e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSaveSettings = async (e: React.FormEvent) => {
     e.preventDefault();
     setApiUrl(apiUrl);
     
-    // Demonstrate save state
-    setSavedMsg('Settings saved locally. Note: Calibration adjustments reflect in real-time scoring runs.');
+    try {
+      const res = await fetch(`${getApiUrl()}/api/v1/settings`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          api_url: apiUrl,
+          catboost_weight: catboostWeight / 100,
+          iforest_weight: iforestWeight / 100,
+          lof_weight: lofWeight / 100,
+          robust_z_weight: robustZWeight / 100,
+          peer_benchmark_weight: peerBenchmarkWeight / 100,
+          leie_weight: leieWeight / 100,
+          z_cutoff: zCutoff,
+          high_risk_limit: highRiskLimit,
+          crit_risk_limit: critRiskLimit
+        })
+      });
+      if (res.ok) {
+        setSavedMsg('Configuration successfully updated and persisted in database.');
+      } else {
+        setSavedMsg('Failed to persist configuration to database.');
+      }
+    } catch (err) {
+      setSavedMsg('Network error while saving configurations.');
+    }
     setTimeout(() => setSavedMsg(''), 4000);
   };
 
   const resetToDefault = () => {
     setApiUrlState('http://localhost:8000');
-    setMlWeight(40);
-    setStatWeight(30);
-    setPeerWeight(30);
+    setCatboostWeight(25);
+    setIforestWeight(20);
+    setLofWeight(15);
+    setRobustZWeight(15);
+    setPeerBenchmarkWeight(15);
+    setLeieWeight(10);
     setZCutoff(3.0);
     setHighRiskLimit(65);
     setCritRiskLimit(85);
   };
 
-  const totalWeights = mlWeight + statWeight + peerWeight;
+  const totalWeights = catboostWeight + iforestWeight + lofWeight + robustZWeight + peerBenchmarkWeight + leieWeight;
+
+  if (loading) {
+    return (
+      <div className="provider-loading">
+        <div className="pulse-loader"></div>
+        <p>Loading System Configurations...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="settings-page animate-fade-in">
@@ -80,48 +147,93 @@ const Settings: React.FC = () => {
           <p className="section-desc">Tune the coefficients for the multi-signal risk scoring fusion engine (must equal 100%).</p>
           
           <div className="weights-sliders-container">
-            {/* ML */}
+            {/* CatBoost */}
             <div className="slider-group">
               <div className="slider-header">
-                <span>Machine Learning Models Weight</span>
-                <span className="slider-val">{mlWeight}%</span>
+                <span>CatBoost Classifier Weight</span>
+                <span className="slider-val">{catboostWeight}%</span>
               </div>
               <input 
                 type="range" 
                 min="0" 
                 max="100" 
-                value={mlWeight} 
-                onChange={(e) => setMlWeight(Number(e.target.value))}
+                value={catboostWeight} 
+                onChange={(e) => setCatboostWeight(Number(e.target.value))}
               />
             </div>
 
-            {/* Stat */}
+            {/* Isolation Forest */}
             <div className="slider-group">
               <div className="slider-header">
-                <span>Statistical Outlier Weight</span>
-                <span className="slider-val">{statWeight}%</span>
+                <span>Isolation Forest Weight</span>
+                <span className="slider-val">{iforestWeight}%</span>
               </div>
               <input 
                 type="range" 
                 min="0" 
                 max="100" 
-                value={statWeight} 
-                onChange={(e) => setStatWeight(Number(e.target.value))}
+                value={iforestWeight} 
+                onChange={(e) => setIforestWeight(Number(e.target.value))}
               />
             </div>
 
-            {/* Peer */}
+            {/* LOF */}
+            <div className="slider-group">
+              <div className="slider-header">
+                <span>Local Outlier Factor (LOF) Weight</span>
+                <span className="slider-val">{lofWeight}%</span>
+              </div>
+              <input 
+                type="range" 
+                min="0" 
+                max="100" 
+                value={lofWeight} 
+                onChange={(e) => setLofWeight(Number(e.target.value))}
+              />
+            </div>
+
+            {/* Robust Z-Score */}
+            <div className="slider-group">
+              <div className="slider-header">
+                <span>Robust Z-Score Weight</span>
+                <span className="slider-val">{robustZWeight}%</span>
+              </div>
+              <input 
+                type="range" 
+                min="0" 
+                max="100" 
+                value={robustZWeight} 
+                onChange={(e) => setRobustZWeight(Number(e.target.value))}
+              />
+            </div>
+
+            {/* Peer Benchmarking */}
             <div className="slider-group">
               <div className="slider-header">
                 <span>Peer Benchmarking Weight</span>
-                <span className="slider-val">{peerWeight}%</span>
+                <span className="slider-val">{peerBenchmarkWeight}%</span>
               </div>
               <input 
                 type="range" 
                 min="0" 
                 max="100" 
-                value={peerWeight} 
-                onChange={(e) => setPeerWeight(Number(e.target.value))}
+                value={peerBenchmarkWeight} 
+                onChange={(e) => setPeerBenchmarkWeight(Number(e.target.value))}
+              />
+            </div>
+
+            {/* LEIE Exclusion */}
+            <div className="slider-group">
+              <div className="slider-header">
+                <span>LEIE Exclusion Screening Weight</span>
+                <span className="slider-val">{leieWeight}%</span>
+              </div>
+              <input 
+                type="range" 
+                min="0" 
+                max="100" 
+                value={leieWeight} 
+                onChange={(e) => setLeieWeight(Number(e.target.value))}
               />
             </div>
 

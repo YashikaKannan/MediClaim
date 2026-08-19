@@ -29,7 +29,7 @@ const AIAssistant: React.FC = () => {
   const location = useLocation();
   const state = location.state as { providerId?: string } | null;
   
-  const [providerId, setProviderId] = useState(state?.providerId || '');
+  const [providerId, setProviderId] = useState(state?.providerId || localStorage.getItem('mediclaim_selected_provider') || '');
   const [providersList, setProvidersList] = useState<string[]>([]);
   const [activeProviderStats, setActiveProviderStats] = useState<ProviderSummary | null>(null);
   
@@ -96,6 +96,8 @@ const AIAssistant: React.FC = () => {
 
   const handleProviderChange = (id: string) => {
     setProviderId(id);
+    localStorage.setItem('mediclaim_selected_provider', id);
+    window.dispatchEvent(new Event('mediclaim-provider-selected'));
     loadProviderStats(id);
     setMessages([
       {

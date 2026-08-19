@@ -48,6 +48,7 @@ interface ProviderDetails {
     investigation_status: string | null;
     investigation_notes: string | null;
     status_updated_at: string | null;
+    assigned_investigator: string | null;
   };
   model_scores: {
     isolation_score: number;
@@ -58,6 +59,7 @@ interface ProviderDetails {
     ml_score: number;
     statistical_score: number;
     peer_score: number;
+    leie_score?: number;
   };
   peer_benchmarks: {
     reimbursement_ratio: number;
@@ -79,10 +81,13 @@ const ProviderInvestigation: React.FC = () => {
   // Form states
   const [status, setStatus] = useState('New');
   const [notes, setNotes] = useState('');
+  const [assignedInvestigator, setAssignedInvestigator] = useState('Unassigned');
   const [savingStatus, setSavingStatus] = useState(false);
   const [savingNotes, setSavingNotes] = useState(false);
+  const [savingAssign, setSavingAssign] = useState(false);
   const [statusMsg, setStatusMsg] = useState('');
   const [notesMsg, setNotesMsg] = useState('');
+  const [assignMsg, setAssignMsg] = useState('');
 
   useEffect(() => {
     if (id) {
@@ -93,12 +98,14 @@ const ProviderInvestigation: React.FC = () => {
   const fetchDetails = async () => {
     try {
       setLoading(true);
+      if (id) localStorage.setItem('mediclaim_selected_provider', id);
       const res = await fetch(`${getApiUrl()}/api/v1/providers/${id}`);
       if (res.ok) {
         const json = await res.json();
         setData(json);
         setStatus(json.profile.investigation_status || 'New');
         setNotes(json.profile.investigation_notes || '');
+        setAssignedInvestigator(json.profile.assigned_investigator || 'Unassigned');
       }
     } catch (e) {
       console.error(e);
@@ -149,6 +156,27 @@ const ProviderInvestigation: React.FC = () => {
     }
   };
 
+  const handleAssignUpdate = async () => {
+    try {
+      setSavingAssign(true);
+      setAssignMsg('');
+      const res = await fetch(`${getApiUrl()}/api/v1/investigations/${id}/assign`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ assigned_investigator: assignedInvestigator })
+      });
+      if (res.ok) {
+        setAssignMsg('Investigator assigned successfully!');
+        setTimeout(() => setAssignMsg(''), 3000);
+      }
+    } catch (e) {
+      console.error(e);
+      setAssignMsg('Failed to assign investigator.');
+    } finally {
+      setSavingAssign(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="provider-loading">
@@ -175,11 +203,12 @@ const ProviderInvestigation: React.FC = () => {
 
   // Radar chart data for individual models
   const radarData = [
-    { subject: 'Isolation Forest', score: model_scores.isolation_score },
-    { subject: 'Autoencoder', score: model_scores.autoencoder_score },
-    { subject: 'LOF', score: model_scores.lof_score },
-    { subject: 'One-Class SVM', score: model_scores.ocsvm_score },
-    { subject: 'CatBoost (Supervised)', score: model_scores.catboost_score }
+    { subject: 'CatBoost', score: model_scores.catboost_score || 0 },
+    { subject: 'Isolation Forest', score: model_scores.isolation_score || 0 },
+    { subject: 'LOF', score: model_scores.lof_score || 0 },
+    { subject: 'Robust Z-Score', score: model_scores.statistical_score || 0 },
+    { subject: 'Peer Benchmarking', score: model_scores.peer_score || 0 },
+    { subject: 'LEIE Match', score: model_scores.leie_score || 0 }
   ];
 
   // Bar chart data for peer ratios
@@ -275,31 +304,45 @@ const ProviderInvestigation: React.FC = () => {
               <div className="signals-metrics-list">
                 <div className="signal-progress-row">
                   <div className="progress-lbl-container">
-                    <span>Supervised Score (CatBoost)</span>
-                    <span className="bold">{model_scores.catboost_score.toFixed(1)}%</span>
+                    <span>CatBoost Classifier Score</span>
+                    <span className="bold">{(model_scores.catboost_score || 0).toFixed(1)}%</span>
                   </div>
-                  <div className="progress-bg"><div className="progress-fg purple" style={{width: `${model_scores.catboost_score}%`}}></div></div>
+                  <div className="progress-bg"><div className="progress-fg purple" style={{width: `${model_scores.catboost_score || 0}%`}}></div></div>
                 </div>
                 <div className="signal-progress-row">
                   <div className="progress-lbl-container">
-                    <span>Unsupervised Score (Ensemble)</span>
-                    <span className="bold">{model_scores.ml_score.toFixed(1)}%</span>
+                    <span>Isolation Forest Outlier Score</span>
+                    <span className="bold">{(model_scores.isolation_score || 0).toFixed(1)}%</span>
                   </div>
-                  <div className="progress-bg"><div className="progress-fg blue" style={{width: `${model_scores.ml_score}%`}}></div></div>
+                  <div className="progress-bg"><div className="progress-fg blue" style={{width: `${model_scores.isolation_score || 0}%`}}></div></div>
                 </div>
                 <div className="signal-progress-row">
                   <div className="progress-lbl-container">
-                    <span>Statistical Deviation (Z-Score)</span>
-                    <span className="bold">{model_scores.statistical_score.toFixed(1)}%</span>
+                    <span>Local Outlier Factor (LOF) Score</span>
+                    <span className="bold">{(model_scores.lof_score || 0).toFixed(1)}%</span>
                   </div>
-                  <div className="progress-bg"><div className="progress-fg orange" style={{width: `${model_scores.statistical_score}%`}}></div></div>
+                  <div className="progress-bg"><div className="progress-fg blue" style={{width: `${model_scores.lof_score || 0}%`}}></div></div>
                 </div>
                 <div className="signal-progress-row">
                   <div className="progress-lbl-container">
-                    <span>Peer Benchmark Variance</span>
-                    <span className="bold">{model_scores.peer_score.toFixed(1)}%</span>
+                    <span>Robust Z-Score Engine Deviation</span>
+                    <span className="bold">{(model_scores.statistical_score || 0).toFixed(1)}%</span>
                   </div>
-                  <div className="progress-bg"><div className="progress-fg teal" style={{width: `${model_scores.peer_score}%`}}></div></div>
+                  <div className="progress-bg"><div className="progress-fg orange" style={{width: `${model_scores.statistical_score || 0}%`}}></div></div>
+                </div>
+                <div className="signal-progress-row">
+                  <div className="progress-lbl-container">
+                    <span>Peer Benchmarking Engine Variance</span>
+                    <span className="bold">{(model_scores.peer_score || 0).toFixed(1)}%</span>
+                  </div>
+                  <div className="progress-bg"><div className="progress-fg teal" style={{width: `${model_scores.peer_score || 0}%`}}></div></div>
+                </div>
+                <div className="signal-progress-row">
+                  <div className="progress-lbl-container">
+                    <span>LEIE Exclusion Screening Match</span>
+                    <span className="bold">{(model_scores.leie_score || 0).toFixed(1)}%</span>
+                  </div>
+                  <div className="progress-bg"><div className="progress-fg red" style={{width: `${model_scores.leie_score || 0}%`}}></div></div>
                 </div>
               </div>
             </div>
@@ -412,6 +455,38 @@ const ProviderInvestigation: React.FC = () => {
                   </button>
                 </div>
                 {statusMsg && <p className="success-msg">{statusMsg}</p>}
+              </div>
+
+              {/* Assigned Investigator */}
+              <div className="audit-field">
+                <label className="field-label">Assigned Investigator</label>
+                <div className="status-flex">
+                  <input 
+                    type="text" 
+                    value={assignedInvestigator} 
+                    onChange={(e) => setAssignedInvestigator(e.target.value)}
+                    className="investigator-input"
+                    placeholder="Enter investigator name..."
+                    style={{
+                      flex: 1,
+                      padding: '0.5rem 0.75rem',
+                      background: 'rgba(255, 255, 255, 0.03)',
+                      border: '1px solid var(--border-color)',
+                      borderRadius: '8px',
+                      color: 'var(--text-primary)',
+                      fontSize: '0.85rem'
+                    }}
+                  />
+                  <button 
+                    className="btn btn-secondary save-status-btn"
+                    onClick={handleAssignUpdate}
+                    disabled={savingAssign}
+                  >
+                    <Save size={14} />
+                    {savingAssign ? 'Saving...' : 'Assign'}
+                  </button>
+                </div>
+                {assignMsg && <p className="success-msg">{assignMsg}</p>}
               </div>
 
               {/* Investigator Notes */}

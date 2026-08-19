@@ -4,9 +4,10 @@ import {
   Users, 
   AlertTriangle, 
   ShieldAlert, 
-  Layers,
   Activity,
-  ArrowUpRight
+  ArrowUpRight,
+  FolderOpen,
+  CheckCircle2
 } from 'lucide-react';
 import { 
   BarChart, 
@@ -29,6 +30,11 @@ interface DashboardData {
   total_claims: number;
   total_reimbursement: number;
   investigation_queue_count: number;
+  high_risk_count: number;
+  critical_risk_count: number;
+  providers_under_investigation: number;
+  open_investigations: number;
+  closed_investigations: number;
   risk_distribution: {
     Low: number;
     Medium: number;
@@ -133,6 +139,7 @@ const Dashboard: React.FC = () => {
         </div>
       </div>
 
+
       {/* KPI Cards */}
       <div className="kpi-grid">
         <div className="card kpi-card">
@@ -142,7 +149,7 @@ const Dashboard: React.FC = () => {
           <div className="kpi-content">
             <p className="kpi-lbl">Total Providers</p>
             <h2 className="kpi-val">{data.total_providers.toLocaleString()}</h2>
-            <span className="kpi-subtext">Across 52 States</span>
+            <span className="kpi-subtext">Registered Entities</span>
           </div>
         </div>
 
@@ -152,8 +159,8 @@ const Dashboard: React.FC = () => {
           </div>
           <div className="kpi-content">
             <p className="kpi-lbl">High Risk Providers</p>
-            <h2 className="kpi-val">{data.risk_distribution.High.toLocaleString()}</h2>
-            <span className="kpi-subtext">Requires regular audit</span>
+            <h2 className="kpi-val">{data.high_risk_count?.toLocaleString() || data.risk_distribution.High.toLocaleString()}</h2>
+            <span className="kpi-subtext">Score &gt;= 65</span>
           </div>
         </div>
 
@@ -163,22 +170,45 @@ const Dashboard: React.FC = () => {
           </div>
           <div className="kpi-content">
             <p className="kpi-lbl">Critical Providers</p>
-            <h2 className="kpi-val">{data.risk_distribution.Critical.toLocaleString()}</h2>
-            <span className="kpi-subtext">Immediate audit recommended</span>
+            <h2 className="kpi-val">{data.critical_risk_count?.toLocaleString() || data.risk_distribution.Critical.toLocaleString()}</h2>
+            <span className="kpi-subtext">Score &gt;= 85</span>
           </div>
         </div>
 
         <div className="card kpi-card">
           <div className="kpi-icon-container purple">
-            <Layers size={22} />
+            <Activity size={22} />
           </div>
           <div className="kpi-content">
-            <p className="kpi-lbl">Pending Review</p>
-            <h2 className="kpi-val">{data.investigation_queue_count.toLocaleString()}</h2>
-            <span className="kpi-subtext">Active investigation queue</span>
+            <p className="kpi-lbl">Under Investigation</p>
+            <h2 className="kpi-val">{data.providers_under_investigation?.toLocaleString() || '0'}</h2>
+            <span className="kpi-subtext">Active Auditor Review</span>
+          </div>
+        </div>
+
+        <div className="card kpi-card">
+          <div className="kpi-icon-container orange">
+            <FolderOpen size={22} />
+          </div>
+          <div className="kpi-content">
+            <p className="kpi-lbl">Open Investigations</p>
+            <h2 className="kpi-val">{data.open_investigations?.toLocaleString() || '0'}</h2>
+            <span className="kpi-subtext">New &amp; In-Progress</span>
+          </div>
+        </div>
+
+        <div className="card kpi-card">
+          <div className="kpi-icon-container green">
+            <CheckCircle2 size={22} />
+          </div>
+          <div className="kpi-content">
+            <p className="kpi-lbl">Closed Cases</p>
+            <h2 className="kpi-val">{data.closed_investigations?.toLocaleString() || '0'}</h2>
+            <span className="kpi-subtext">Reviewed &amp; Resolved</span>
           </div>
         </div>
       </div>
+
 
       {/* Charts Section */}
       <div className="dashboard-charts-grid">
@@ -283,7 +313,11 @@ const Dashboard: React.FC = () => {
                     <td>
                       <button 
                         className="action-link-btn"
-                        onClick={() => navigate(`/provider/${prov.provider_id}`)}
+                        onClick={() => {
+                          localStorage.setItem('mediclaim_selected_provider', prov.provider_id);
+                          window.dispatchEvent(new Event('mediclaim-provider-selected'));
+                          navigate(`/provider/${prov.provider_id}`);
+                        }}
                       >
                         Investigate <ArrowUpRight size={14} />
                       </button>
@@ -315,7 +349,11 @@ const Dashboard: React.FC = () => {
                     <div className="timeline-header">
                       <h4 
                         className="timeline-title" 
-                        onClick={() => navigate(`/provider/${act.provider_id}`)}
+                        onClick={() => {
+                          localStorage.setItem('mediclaim_selected_provider', act.provider_id);
+                          window.dispatchEvent(new Event('mediclaim-provider-selected'));
+                          navigate(`/provider/${act.provider_id}`);
+                        }}
                       >
                         Provider {act.provider_id}
                       </h4>

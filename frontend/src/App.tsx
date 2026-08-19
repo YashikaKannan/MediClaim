@@ -9,6 +9,7 @@ import DataIngestion from './pages/DataIngestion';
 import InvestigationQueue from './pages/InvestigationQueue';
 import ProviderInvestigation from './pages/ProviderInvestigation';
 import Analytics from './pages/Analytics';
+import Reports from './pages/Reports';
 import HowItWorks from './pages/HowItWorks';
 import AIAssistant from './pages/AIAssistant';
 import Settings from './pages/Settings';
@@ -32,6 +33,7 @@ const App: React.FC = () => {
             <Route path="/queue" element={<InvestigationQueue />} />
             <Route path="/provider/:id" element={<ProviderInvestigation />} />
             <Route path="/analytics" element={<Analytics />} />
+            <Route path="/reports" element={<Reports />} />
             <Route path="/about" element={<HowItWorks />} />
             <Route path="/assistant" element={<AIAssistant />} />
             <Route path="/settings" element={<Settings />} />
