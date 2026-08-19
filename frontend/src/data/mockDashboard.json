@@ -3,75 +3,10 @@
   "claimsAnalyzed": 1750000,
   "flaggedProviders": 1247,
   "potentialFinancialLeakage": 4200000,
-  "riskDistribution": [
-    { "label": "Low Risk", "value": 42, "color": "#22C55E" },
-    { "label": "Medium Risk", "value": 31, "color": "#EAB308" },
-    { "label": "High Risk", "value": 19, "color": "#F97316" },
-    { "label": "Critical Risk", "value": 8, "color": "#DC2626" }
-  ],
-  "leakageBySpecialty": [
-    { "label": "Cardiology", "value": 91 },
-    { "label": "Radiology", "value": 82 },
-    { "label": "Orthopedics", "value": 74 },
-    { "label": "Neurology", "value": 68 },
-    { "label": "Sleep Medicine", "value": 56 }
-  ],
-  "leakageByState": [
-    { "label": "TX", "value": 94 },
-    { "label": "FL", "value": 85 },
-    { "label": "CA", "value": 78 },
-    { "label": "NY", "value": 71 },
-    { "label": "PA", "value": 59 }
-  ],
-  "leakageByProviderType": [
-    { "label": "Facility", "value": 89 },
-    { "label": "Physician", "value": 76 },
-    { "label": "Ancillary", "value": 67 },
-    { "label": "DME", "value": 58 },
-    { "label": "Outpatient", "value": 49 }
-  ],
-  "topPriorityCases": [
-    {
-      "providerName": "Dr. A. Chen",
-      "npi": "1234567890",
-      "riskScore": 92,
-      "potentialLeakage": 482000,
-      "priorityLevel": "P1",
-      "status": "Investigating",
-      "providerId": "provider-chen"
-    },
-    {
-      "providerName": "Summit Imaging",
-      "npi": "0987654321",
-      "riskScore": 88,
-      "potentialLeakage": 361400,
-      "priorityLevel": "P1",
-      "status": "Assigned",
-      "providerId": "provider-summit"
-    },
-    {
-      "providerName": "North Harbor Clinic",
-      "npi": "1112233334",
-      "riskScore": 81,
-      "potentialLeakage": 294800,
-      "priorityLevel": "P2",
-      "status": "Escalated",
-      "providerId": "provider-harbor"
-    },
-    {
-      "providerName": "Green Valley Orthopedics",
-      "npi": "5556667778",
-      "riskScore": 74,
-      "potentialLeakage": 236200,
-      "priorityLevel": "P2",
-      "status": "Open",
-      "providerId": "provider-green"
-    }
-  ],
-  "systemModelWeights": [
-    { "label": "Peer Analysis", "value": 35 },
-    { "label": "Isolation Forest", "value": 25 },
-    { "label": "LOF", "value": 20 },
-    { "label": "Rule Engine", "value": 20 }
-  ]
+  "riskDistribution": [{ "label": "Low Risk", "value": 42, "color": "#22C55E" }, { "label": "Medium Risk", "value": 31, "color": "#EAB308" }, { "label": "High Risk", "value": 19, "color": "#F97316" }, { "label": "Critical Risk", "value": 8, "color": "#DC2626" }],
+  "leakageBySpecialty": [{ "label": "Cardiology", "value": 91 }, { "label": "Radiology", "value": 82 }, { "label": "Orthopedics", "value": 74 }, { "label": "Neurology", "value": 68 }, { "label": "Sleep Medicine", "value": 56 }],
+  "leakageByState": [{ "label": "TX", "value": 94 }, { "label": "FL", "value": 85 }, { "label": "CA", "value": 78 }, { "label": "NY", "value": 71 }, { "label": "PA", "value": 59 }],
+  "leakageByProviderType": [{ "label": "Facility", "value": 89 }, { "label": "Physician", "value": 76 }, { "label": "Ancillary", "value": 67 }, { "label": "DME", "value": 58 }, { "label": "Outpatient", "value": 49 }],
+  "topPriorityCases": [{ "providerName": "Dr. A. Chen", "npi": "1234567890", "riskScore": 92, "potentialLeakage": 482000, "priorityLevel": "P1", "status": "Investigating", "providerId": "provider-chen" }, { "providerName": "Summit Imaging", "npi": "0987654321", "riskScore": 88, "potentialLeakage": 361400, "priorityLevel": "P1", "status": "Assigned", "providerId": "provider-summit" }, { "providerName": "North Harbor Clinic", "npi": "1112233334", "riskScore": 81, "potentialLeakage": 294800, "priorityLevel": "P2", "status": "Escalated", "providerId": "provider-harbor" }, { "providerName": "Green Valley Orthopedics", "npi": "5556667778", "riskScore": 74, "potentialLeakage": 236200, "priorityLevel": "P2", "status": "Open", "providerId": "provider-green" }],
+  "systemModelWeights": [{ "label": "Peer Analysis", "value": 35 }, { "label": "Isolation Forest", "value": 25 }, { "label": "LOF", "value": 20 }, { "label": "Rule Engine", "value": 20 }]
 }

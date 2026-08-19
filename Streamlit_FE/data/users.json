@@ -1,0 +1,32 @@
+[
+  {
+    "name": "Hannah Smith",
+    "role": "SIU Investigator",
+    "team": "SIU Investigation Team",
+    "user_id": "SIU-1042"
+  },
+  {
+    "name": "Michael Chen",
+    "role": "Medicare Payment Integrity Team",
+    "team": "Medicare Payment Integrity",
+    "user_id": "MPI-2018"
+  },
+  {
+    "name": "Alicia Stone",
+    "role": "Claims Audit Team",
+    "team": "Claims Audit Team",
+    "user_id": "AUD-3021"
+  },
+  {
+    "name": "Daniel Brooks",
+    "role": "Fraud Analyst",
+    "team": "Fraud Analytics",
+    "user_id": "FA-4112"
+  },
+  {
+    "name": "Priya Rao",
+    "role": "Insurance Company Fraud Investigation Team",
+    "team": "Insurance Fraud Investigation",
+    "user_id": "IFI-5099"
+  }
+]

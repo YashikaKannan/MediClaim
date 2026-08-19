@@ -1,0 +1,168 @@
+{
+  "risk_tiers": [
+    {
+      "Tier": "Low",
+      "Score Range": "0-30",
+      "Color": "Green"
+    },
+    {
+      "Tier": "Medium",
+      "Score Range": "31-60",
+      "Color": "Amber"
+    },
+    {
+      "Tier": "High",
+      "Score Range": "61-80",
+      "Color": "Orange"
+    },
+    {
+      "Tier": "Critical",
+      "Score Range": "81-100",
+      "Color": "Red"
+    }
+  ],
+  "models": [
+    {
+      "Model": "Peer Benchmark Analysis",
+      "Purpose": "Provider comparison against relevant provider peers",
+      "Weight": "35%",
+      "Status": "Active"
+    },
+    {
+      "Model": "Isolation Forest",
+      "Purpose": "Provider anomaly detection",
+      "Weight": "25%",
+      "Status": "Active"
+    },
+    {
+      "Model": "Local Outlier Factor (LOF)",
+      "Purpose": "Local density anomaly detection",
+      "Weight": "20%",
+      "Status": "Active"
+    },
+    {
+      "Model": "Rule Engine",
+      "Purpose": "Duplicate billing and payment integrity rules",
+      "Weight": "20%",
+      "Status": "Active"
+    },
+    {
+      "Model": "One-Class SVM",
+      "Purpose": "Advanced anomaly detection",
+      "Weight": "\u2014",
+      "Status": "Planned"
+    },
+    {
+      "Model": "Behavioral Drift Detection",
+      "Purpose": "Billing trend analysis",
+      "Weight": "\u2014",
+      "Status": "Planned"
+    }
+  ],
+  "weights": [
+    {
+      "Model": "Peer Analysis",
+      "Weight": 35
+    },
+    {
+      "Model": "Isolation Forest",
+      "Weight": 25
+    },
+    {
+      "Model": "LOF",
+      "Weight": 20
+    },
+    {
+      "Model": "Rule Engine",
+      "Weight": 20
+    }
+  ],
+  "data_sources": [
+    {
+      "Source Name": "Carrier Claims",
+      "Records Count": 1360028,
+      "Last Refresh Date": "2026-08-15",
+      "Status": "Connected"
+    },
+    {
+      "Source Name": "Outpatient Claims",
+      "Records Count": 482411,
+      "Last Refresh Date": "2026-08-15",
+      "Status": "Connected"
+    },
+    {
+      "Source Name": "Inpatient Claims",
+      "Records Count": 224730,
+      "Last Refresh Date": "2026-08-15",
+      "Status": "Connected"
+    },
+    {
+      "Source Name": "Provider Master Dataset",
+      "Records Count": 4287,
+      "Last Refresh Date": "2026-08-14",
+      "Status": "Connected"
+    },
+    {
+      "Source Name": "Beneficiary Dataset",
+      "Records Count": 912553,
+      "Last Refresh Date": "2026-08-15",
+      "Status": "Connected"
+    },
+    {
+      "Source Name": "LEIE Exclusion List",
+      "Records Count": 79264,
+      "Last Refresh Date": "2026-08-13",
+      "Status": "Connected"
+    }
+  ],
+  "quality": {
+    "Total Records Processed": 2143273,
+    "Missing Values": 19425,
+    "Duplicate Records": 3812,
+    "Failed Validations": 1024,
+    "Data Quality Score": 98.4
+  },
+  "business_validation": {
+    "Flagged Providers": 143,
+    "LEIE Matches": 12,
+    "LEIE Match Rate": 8.4,
+    "Potential Excess Amount Detected": 18400000,
+    "Claims Reviewed": 1360028
+  },
+  "system_health": [
+    {
+      "Component": "Provider Scoring Pipeline",
+      "Status": "Healthy"
+    },
+    {
+      "Component": "Claim Scoring Pipeline",
+      "Status": "Healthy"
+    },
+    {
+      "Component": "Risk Fusion Engine",
+      "Status": "Healthy"
+    },
+    {
+      "Component": "Report Generation",
+      "Status": "Healthy"
+    },
+    {
+      "Component": "AI Assistant",
+      "Status": "Healthy"
+    }
+  ],
+  "audit_log": [
+    {
+      "Timestamp": "08:45 AM",
+      "Event": "Provider scoring completed",
+      "User": "System",
+      "Status": "Success"
+    },
+    {
+      "Timestamp": "09:12 AM",
+      "Event": "Monthly leakage report generated",
+      "User": "Hannah Smith",
+      "Status": "Success"
+    }
+  ]
+}

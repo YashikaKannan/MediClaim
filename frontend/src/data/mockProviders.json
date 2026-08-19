@@ -1,157 +1,23 @@
 [
   {
-    "id": "provider-chen",
-    "name": "Dr. A. Chen",
-    "npi": "1234567890",
-    "specialty": "Cardiology",
-    "location": "Houston, TX",
-    "totalClaims": 7860,
-    "totalPaid": 66500000,
-    "riskScore": 92,
-    "riskLabel": "Critical Risk",
-    "reasons": [
-      {
-        "reason": "Average Claim Amount 2.8x Peer Median",
-        "source": "Peer Benchmarking",
-        "status": "LIVE"
-      },
-      {
-        "reason": "Appears Anomalous In Isolation Forest",
-        "source": "Provider ML Ensemble",
-        "status": "LIVE"
-      },
-      {
-        "reason": "Billing Velocity Spike",
-        "source": "Behavioral Drift",
-        "status": "PLANNED"
-      },
-      {
-        "reason": "Outlier Procedure Utilization",
-        "source": "Rule Engine",
-        "status": "LIVE"
-      }
-    ],
-    "peerMetrics": [
-      { "metric": "Avg Claim Amount", "provider": 920, "peerMedian": 340, "providerDisplay": "$920", "peerDisplay": "$340" },
-      { "metric": "Claims Volume", "provider": 520, "peerMedian": 188, "providerDisplay": "520", "peerDisplay": "188" },
-      { "metric": "Total Paid", "provider": 420000, "peerMedian": 140000, "providerDisplay": "$420K", "peerDisplay": "$140K" },
-      { "metric": "Beneficiaries", "provider": 120, "peerMedian": 87, "providerDisplay": "120", "peerDisplay": "87" }
-    ],
-    "peerGroup": {
-      "specialty": "Cardiology",
-      "region": "Texas",
-      "peerCount": 4102,
-      "threshold": "Met",
-      "confidence": "High"
-    },
-    "potentialExcessPayment": 468980,
-    "scoreBreakdown": [
-      { "label": "Peer Analysis", "value": 35 },
-      { "label": "Isolation Forest", "value": 25 },
-      { "label": "LOF", "value": 15 },
-      { "label": "Rule Engine", "value": 17 },
-      { "label": "Final Score", "value": 92 }
-    ],
-    "associatedClaims": ["CLM-824791", "CLM-824820", "CLM-824865"]
+    "id": "provider-chen", "name": "Dr. A. Chen", "npi": "1234567890", "specialty": "Cardiology", "location": "Houston, TX", "totalClaims": 7860, "totalPaid": 66500000, "riskScore": 92, "riskLabel": "Critical Risk",
+    "reasons": [{ "reason": "Average Claim Amount 2.8x Peer Median", "source": "Peer Benchmarking", "status": "LIVE" }, { "reason": "Appears Anomalous In Isolation Forest", "source": "Provider ML Ensemble", "status": "LIVE" }, { "reason": "Billing Velocity Spike", "source": "Behavioral Drift", "status": "PLANNED" }, { "reason": "Outlier Procedure Utilization", "source": "Rule Engine", "status": "LIVE" }],
+    "peerMetrics": [{ "metric": "Avg Claim Amount", "provider": 920, "peerMedian": 340, "providerDisplay": "$920", "peerDisplay": "$340" }, { "metric": "Claims Volume", "provider": 520, "peerMedian": 188, "providerDisplay": "520", "peerDisplay": "188" }, { "metric": "Total Paid", "provider": 420000, "peerMedian": 140000, "providerDisplay": "$420K", "peerDisplay": "$140K" }, { "metric": "Beneficiaries", "provider": 120, "peerMedian": 87, "providerDisplay": "120", "peerDisplay": "87" }],
+    "peerGroup": { "specialty": "Cardiology", "region": "Texas", "peerCount": 4102, "threshold": "Met", "confidence": "High" }, "potentialExcessPayment": 468980,
+    "scoreBreakdown": [{ "label": "Peer Analysis", "value": 35 }, { "label": "Isolation Forest", "value": 25 }, { "label": "LOF", "value": 15 }, { "label": "Rule Engine", "value": 17 }, { "label": "Final Score", "value": 92 }], "associatedClaims": ["CLM-824791", "CLM-824820", "CLM-824865"]
   },
   {
-    "id": "provider-summit",
-    "name": "Summit Imaging",
-    "npi": "0987654321",
-    "specialty": "Radiology",
-    "location": "Miami, FL",
-    "totalClaims": 5340,
-    "totalPaid": 48600000,
-    "riskScore": 88,
-    "riskLabel": "Critical Risk",
-    "reasons": [
-      {
-        "reason": "Unusually High Imaging Volume",
-        "source": "Peer Benchmarking",
-        "status": "LIVE"
-      },
-      {
-        "reason": "Outlier Modality Mix",
-        "source": "Isolation Forest",
-        "status": "LIVE"
-      },
-      {
-        "reason": "Service Burst Pattern",
-        "source": "Behavioral Drift",
-        "status": "PLANNED"
-      }
-    ],
-    "peerMetrics": [
-      { "metric": "Avg Claim Amount", "provider": 860, "peerMedian": 310, "providerDisplay": "$860", "peerDisplay": "$310" },
-      { "metric": "Claims Volume", "provider": 470, "peerMedian": 185, "providerDisplay": "470", "peerDisplay": "185" },
-      { "metric": "Total Paid", "provider": 392000, "peerMedian": 145000, "providerDisplay": "$392K", "peerDisplay": "$145K" },
-      { "metric": "Beneficiaries", "provider": 108, "peerMedian": 72, "providerDisplay": "108", "peerDisplay": "72" }
-    ],
-    "peerGroup": {
-      "specialty": "Radiology",
-      "region": "Florida",
-      "peerCount": 2941,
-      "threshold": "Met",
-      "confidence": "High"
-    },
-    "potentialExcessPayment": 361400,
-    "scoreBreakdown": [
-      { "label": "Peer Analysis", "value": 30 },
-      { "label": "Isolation Forest", "value": 24 },
-      { "label": "LOF", "value": 17 },
-      { "label": "Rule Engine", "value": 17 },
-      { "label": "Final Score", "value": 88 }
-    ],
-    "associatedClaims": ["CLM-914442", "CLM-914500"]
+    "id": "provider-summit", "name": "Summit Imaging", "npi": "0987654321", "specialty": "Radiology", "location": "Miami, FL", "totalClaims": 5340, "totalPaid": 48600000, "riskScore": 88, "riskLabel": "Critical Risk",
+    "reasons": [{ "reason": "Unusually High Imaging Volume", "source": "Peer Benchmarking", "status": "LIVE" }, { "reason": "Outlier Modality Mix", "source": "Isolation Forest", "status": "LIVE" }, { "reason": "Service Burst Pattern", "source": "Behavioral Drift", "status": "PLANNED" }],
+    "peerMetrics": [{ "metric": "Avg Claim Amount", "provider": 860, "peerMedian": 310, "providerDisplay": "$860", "peerDisplay": "$310" }, { "metric": "Claims Volume", "provider": 470, "peerMedian": 185, "providerDisplay": "470", "peerDisplay": "185" }, { "metric": "Total Paid", "provider": 392000, "peerMedian": 145000, "providerDisplay": "$392K", "peerDisplay": "$145K" }, { "metric": "Beneficiaries", "provider": 108, "peerMedian": 72, "providerDisplay": "108", "peerDisplay": "72" }],
+    "peerGroup": { "specialty": "Radiology", "region": "Florida", "peerCount": 2941, "threshold": "Met", "confidence": "High" }, "potentialExcessPayment": 361400,
+    "scoreBreakdown": [{ "label": "Peer Analysis", "value": 30 }, { "label": "Isolation Forest", "value": 24 }, { "label": "LOF", "value": 17 }, { "label": "Rule Engine", "value": 17 }, { "label": "Final Score", "value": 88 }], "associatedClaims": ["CLM-914442", "CLM-914500"]
   },
   {
-    "id": "provider-harbor",
-    "name": "North Harbor Clinic",
-    "npi": "1112233334",
-    "specialty": "Orthopedics",
-    "location": "Chicago, IL",
-    "totalClaims": 4210,
-    "totalPaid": 33900000,
-    "riskScore": 81,
-    "riskLabel": "Critical Risk",
-    "reasons": [
-      {
-        "reason": "Provider-level Billing Outlier",
-        "source": "Peer Benchmarking",
-        "status": "LIVE"
-      },
-      {
-        "reason": "Claims Clustered by Procedure Code",
-        "source": "Rule Engine",
-        "status": "LIVE"
-      },
-      {
-        "reason": "Follow-up Visit Surge",
-        "source": "Behavioral Drift",
-        "status": "PLANNED"
-      }
-    ],
-    "peerMetrics": [
-      { "metric": "Avg Claim Amount", "provider": 720, "peerMedian": 290, "providerDisplay": "$720", "peerDisplay": "$290" },
-      { "metric": "Claims Volume", "provider": 360, "peerMedian": 160, "providerDisplay": "360", "peerDisplay": "160" },
-      { "metric": "Total Paid", "provider": 248000, "peerMedian": 118000, "providerDisplay": "$248K", "peerDisplay": "$118K" },
-      { "metric": "Beneficiaries", "provider": 94, "peerMedian": 62, "providerDisplay": "94", "peerDisplay": "62" }
-    ],
-    "peerGroup": {
-      "specialty": "Orthopedics",
-      "region": "Illinois",
-      "peerCount": 3711,
-      "threshold": "Met",
-      "confidence": "Medium"
-    },
-    "potentialExcessPayment": 294800,
-    "scoreBreakdown": [
-      { "label": "Peer Analysis", "value": 28 },
-      { "label": "Isolation Forest", "value": 21 },
-      { "label": "LOF", "value": 18 },
-      { "label": "Rule Engine", "value": 14 },
-      { "label": "Final Score", "value": 81 }
-    ],
-    "associatedClaims": ["CLM-991021", "CLM-991099"]
+    "id": "provider-harbor", "name": "North Harbor Clinic", "npi": "1112233334", "specialty": "Orthopedics", "location": "Chicago, IL", "totalClaims": 4210, "totalPaid": 33900000, "riskScore": 81, "riskLabel": "Critical Risk",
+    "reasons": [{ "reason": "Provider-level Billing Outlier", "source": "Peer Benchmarking", "status": "LIVE" }, { "reason": "Claims Clustered by Procedure Code", "source": "Rule Engine", "status": "LIVE" }, { "reason": "Follow-up Visit Surge", "source": "Behavioral Drift", "status": "PLANNED" }],
+    "peerMetrics": [{ "metric": "Avg Claim Amount", "provider": 720, "peerMedian": 290, "providerDisplay": "$720", "peerDisplay": "$290" }, { "metric": "Claims Volume", "provider": 360, "peerMedian": 160, "providerDisplay": "360", "peerDisplay": "160" }, { "metric": "Total Paid", "provider": 248000, "peerMedian": 118000, "providerDisplay": "$248K", "peerDisplay": "$118K" }, { "metric": "Beneficiaries", "provider": 94, "peerMedian": 62, "providerDisplay": "94", "peerDisplay": "62" }],
+    "peerGroup": { "specialty": "Orthopedics", "region": "Illinois", "peerCount": 3711, "threshold": "Met", "confidence": "Medium" }, "potentialExcessPayment": 294800,
+    "scoreBreakdown": [{ "label": "Peer Analysis", "value": 28 }, { "label": "Isolation Forest", "value": 21 }, { "label": "LOF", "value": 18 }, { "label": "Rule Engine", "value": 14 }, { "label": "Final Score", "value": 81 }], "associatedClaims": ["CLM-991021", "CLM-991099"]
   }
 ]

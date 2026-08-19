@@ -1,62 +1,7 @@
 [
-  {
-    "id": 1,
-    "priorityRank": 96,
-    "providerName": "Dr. A. Chen",
-    "npi": "1234567890",
-    "specialty": "Cardiology",
-    "riskScore": 92,
-    "potentialLeakage": 482000,
-    "status": "Investigating",
-    "assignedInvestigator": "Hannah Smith",
-    "providerId": "provider-chen"
-  },
-  {
-    "id": 2,
-    "priorityRank": 89,
-    "providerName": "Summit Imaging",
-    "npi": "0987654321",
-    "specialty": "Radiology",
-    "riskScore": 88,
-    "potentialLeakage": 361400,
-    "status": "Assigned",
-    "assignedInvestigator": "Alicia Stone",
-    "providerId": "provider-summit"
-  },
-  {
-    "id": 3,
-    "priorityRank": 82,
-    "providerName": "North Harbor Clinic",
-    "npi": "1112233334",
-    "specialty": "Orthopedics",
-    "riskScore": 81,
-    "potentialLeakage": 294800,
-    "status": "Escalated",
-    "assignedInvestigator": "Marcus Lee",
-    "providerId": "provider-harbor"
-  },
-  {
-    "id": 4,
-    "priorityRank": 74,
-    "providerName": "Green Valley Orthopedics",
-    "npi": "5556667778",
-    "specialty": "Orthopedics",
-    "riskScore": 74,
-    "potentialLeakage": 236200,
-    "status": "Open",
-    "assignedInvestigator": "Unassigned",
-    "providerId": "provider-green"
-  },
-  {
-    "id": 5,
-    "priorityRank": 67,
-    "providerName": "Atlantic Neurology",
-    "npi": "3334445556",
-    "specialty": "Neurology",
-    "riskScore": 67,
-    "potentialLeakage": 198300,
-    "status": "Closed",
-    "assignedInvestigator": "Grace Owen",
-    "providerId": "provider-atlantic"
-  }
+  { "id": 1, "priorityRank": 96, "providerName": "Dr. A. Chen", "npi": "1234567890", "specialty": "Cardiology", "riskScore": 92, "potentialLeakage": 482000, "status": "Investigating", "assignedInvestigator": "Hannah Smith", "providerId": "provider-chen" },
+  { "id": 2, "priorityRank": 89, "providerName": "Summit Imaging", "npi": "0987654321", "specialty": "Radiology", "riskScore": 88, "potentialLeakage": 361400, "status": "Assigned", "assignedInvestigator": "Alicia Stone", "providerId": "provider-summit" },
+  { "id": 3, "priorityRank": 82, "providerName": "North Harbor Clinic", "npi": "1112233334", "specialty": "Orthopedics", "riskScore": 81, "potentialLeakage": 294800, "status": "Escalated", "assignedInvestigator": "Marcus Lee", "providerId": "provider-harbor" },
+  { "id": 4, "priorityRank": 74, "providerName": "Green Valley Orthopedics", "npi": "5556667778", "specialty": "Orthopedics", "riskScore": 74, "potentialLeakage": 236200, "status": "Open", "assignedInvestigator": "Unassigned", "providerId": "provider-green" },
+  { "id": 5, "priorityRank": 67, "providerName": "Atlantic Neurology", "npi": "3334445556", "specialty": "Neurology", "riskScore": 67, "potentialLeakage": 198300, "status": "Closed", "assignedInvestigator": "Grace Owen", "providerId": "provider-atlantic" }
 ]

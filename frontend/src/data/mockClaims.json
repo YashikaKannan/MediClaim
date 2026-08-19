@@ -1,94 +1,17 @@
 [
   {
-    "id": "CLM-824791",
-    "providerId": "provider-chen",
-    "providerName": "Dr. A. Chen",
-    "beneficiaryId": "BEN-624810",
-    "serviceDate": "2026-08-08",
-    "claimAmount": 18420,
-    "paidAmount": 16960,
-    "riskScore": 86,
-    "riskLabel": "High Risk",
-    "reasons": [
-      {
-        "reason": "Duplicate Billing Pattern",
-        "source": "Rule Engine",
-        "status": "LIVE"
-      },
-      {
-        "reason": "Claim Amount 3.1x Peer Average",
-        "source": "Peer Benchmark",
-        "status": "LIVE"
-      },
-      {
-        "reason": "Provider already high risk",
-        "source": "Provider Risk Context",
-        "status": "LIVE"
-      }
-    ],
-    "procedureBreakdown": [
-      { "hcpcs": "93010", "description": "Cardiovascular stress test", "units": 1, "paidAmount": 4280, "flag": "High" },
-      { "hcpcs": "93303", "description": "Echocardiography", "units": 1, "paidAmount": 5600, "flag": "High" },
-      { "hcpcs": "93042", "description": "Heart rhythm reporting", "units": 2, "paidAmount": 7080, "flag": "Medium" }
-    ],
-    "potentialExcessPayment": 4280
+    "id": "CLM-824791", "providerId": "provider-chen", "providerName": "Dr. A. Chen", "beneficiaryId": "BEN-624810", "serviceDate": "2026-08-08", "claimAmount": 18420, "paidAmount": 16960, "riskScore": 86, "riskLabel": "High Risk",
+    "reasons": [{ "reason": "Duplicate Billing Pattern", "source": "Rule Engine", "status": "LIVE" }, { "reason": "Claim Amount 3.1x Peer Average", "source": "Peer Benchmark", "status": "LIVE" }, { "reason": "Provider already high risk", "source": "Provider Risk Context", "status": "LIVE" }],
+    "procedureBreakdown": [{ "hcpcs": "93010", "description": "Cardiovascular stress test", "units": 1, "paidAmount": 4280, "flag": "High" }, { "hcpcs": "93303", "description": "Echocardiography", "units": 1, "paidAmount": 5600, "flag": "High" }, { "hcpcs": "93042", "description": "Heart rhythm reporting", "units": 2, "paidAmount": 7080, "flag": "Medium" }], "potentialExcessPayment": 4280
   },
   {
-    "id": "CLM-824820",
-    "providerId": "provider-chen",
-    "providerName": "Dr. A. Chen",
-    "beneficiaryId": "BEN-228914",
-    "serviceDate": "2026-08-12",
-    "claimAmount": 17250,
-    "paidAmount": 15810,
-    "riskScore": 79,
-    "riskLabel": "High Risk",
-    "reasons": [
-      {
-        "reason": "Abnormal Procedure Utilization",
-        "source": "Rule Engine",
-        "status": "LIVE"
-      },
-      {
-        "reason": "Extended Episode Length",
-        "source": "Behavioral Drift",
-        "status": "PLANNED"
-      }
-    ],
-    "procedureBreakdown": [
-      { "hcpcs": "93010", "description": "Cardiovascular stress test", "units": 1, "paidAmount": 4310, "flag": "High" },
-      { "hcpcs": "93005", "description": "Electrocardiogram", "units": 2, "paidAmount": 3720, "flag": "Medium" },
-      { "hcpcs": "33883", "description": "Cardiac catheterization", "units": 1, "paidAmount": 7780, "flag": "High" }
-    ],
-    "potentialExcessPayment": 3520
+    "id": "CLM-824820", "providerId": "provider-chen", "providerName": "Dr. A. Chen", "beneficiaryId": "BEN-228914", "serviceDate": "2026-08-12", "claimAmount": 17250, "paidAmount": 15810, "riskScore": 79, "riskLabel": "High Risk",
+    "reasons": [{ "reason": "Abnormal Procedure Utilization", "source": "Rule Engine", "status": "LIVE" }, { "reason": "Extended Episode Length", "source": "Behavioral Drift", "status": "PLANNED" }],
+    "procedureBreakdown": [{ "hcpcs": "93010", "description": "Cardiovascular stress test", "units": 1, "paidAmount": 4310, "flag": "High" }, { "hcpcs": "93005", "description": "Electrocardiogram", "units": 2, "paidAmount": 3720, "flag": "Medium" }, { "hcpcs": "33883", "description": "Cardiac catheterization", "units": 1, "paidAmount": 7780, "flag": "High" }], "potentialExcessPayment": 3520
   },
   {
-    "id": "CLM-914442",
-    "providerId": "provider-summit",
-    "providerName": "Summit Imaging",
-    "beneficiaryId": "BEN-917642",
-    "serviceDate": "2026-08-15",
-    "claimAmount": 12140,
-    "paidAmount": 11090,
-    "riskScore": 83,
-    "riskLabel": "High Risk",
-    "reasons": [
-      {
-        "reason": "Duplicate Imaging Session",
-        "source": "Rule Engine",
-        "status": "LIVE"
-      },
-      {
-        "reason": "High-burden modality mix",
-        "source": "Peer Benchmark",
-        "status": "LIVE"
-      }
-    ],
-    "procedureBreakdown": [
-      { "hcpcs": "71020", "description": "Chest X-ray", "units": 2, "paidAmount": 3390, "flag": "Medium" },
-      { "hcpcs": "72148", "description": "MRI lumbar spine", "units": 1, "paidAmount": 4960, "flag": "High" },
-      { "hcpcs": "74177", "description": "CT abdomen with contrast", "units": 1, "paidAmount": 2740, "flag": "High" }
-    ],
-    "potentialExcessPayment": 2680
+    "id": "CLM-914442", "providerId": "provider-summit", "providerName": "Summit Imaging", "beneficiaryId": "BEN-917642", "serviceDate": "2026-08-15", "claimAmount": 12140, "paidAmount": 11090, "riskScore": 83, "riskLabel": "High Risk",
+    "reasons": [{ "reason": "Duplicate Imaging Session", "source": "Rule Engine", "status": "LIVE" }, { "reason": "High-burden modality mix", "source": "Peer Benchmark", "status": "LIVE" }],
+    "procedureBreakdown": [{ "hcpcs": "71020", "description": "Chest X-ray", "units": 2, "paidAmount": 3390, "flag": "Medium" }, { "hcpcs": "72148", "description": "MRI lumbar spine", "units": 1, "paidAmount": 4960, "flag": "High" }, { "hcpcs": "74177", "description": "CT abdomen with contrast", "units": 1, "paidAmount": 2740, "flag": "High" }], "potentialExcessPayment": 2680
   }
 ]
