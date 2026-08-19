@@ -1,0 +1,41 @@
+# === Dependencies & Build ===
+node_modules/
+dist/
+build/
+.next/
+out/
+
+# === Python ===
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pkl   # ignore large pickle/model files
+*.h5    # ignore Keras models
+*.pt    # ignore PyTorch models
+*.onnx  # ignore ONNX models
+
+# === Data & Artifacts ===
+*.csv
+*.tsv
+*.json
+*.xlsx
+*.zip
+*.tar
+*.gz
+*.rar
+*.7z
+*.log
+*.tmp
+
+# === Environment & Config ===
+.env
+.env.*
+*.config
+*.ini
+
+# === OS / Editor junk ===
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
